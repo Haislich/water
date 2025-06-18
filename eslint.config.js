@@ -7,59 +7,59 @@ import tsPlugin from 'typescript-eslint';
 
 /** @type {import('eslint').Linter.Config[]} */
 export default [
-    // Security
-    securityPlugin.configs.recommended,
-    {
-        files: ['**/*.ts'],
+  // Security
+  securityPlugin.configs.recommended,
+  {
+    files: ['**/*.ts'],
+  },
+  {
+    languageOptions: { globals: globals.node },
+  },
+  {
+    rules: {
+      'func-style': ['error', 'expression'],
+      'no-restricted-syntax': ['off', 'ForOfStatement'],
+      'no-console': ['error'],
+      'prefer-template': 'error',
+      quotes: ['error', 'single', { avoidEscape: true }],
     },
-    {
-        languageOptions: { globals: globals.node },
+  },
+  // TypeScript Eslint
+  {
+    rules: {
+      '@typescript-eslint/explicit-function-return-type': 'error',
+      '@typescript-eslint/consistent-type-definitions': ['error', 'type'],
     },
-    {
-        rules: {
-            'func-style': ['error', 'expression'],
-            'no-restricted-syntax': ['off', 'ForOfStatement'],
-            'no-console': ['error'],
-            'prefer-template': 'error',
-            quotes: ['error', 'single', { avoidEscape: true }],
-        },
+  },
+  // Prettier
+  {
+    plugins: {
+      prettier,
     },
-    // TypeScript Eslint
-    {
-        rules: {
-            '@typescript-eslint/explicit-function-return-type': 'error',
-            '@typescript-eslint/consistent-type-definitions': ['error', 'type'],
+    rules: {
+      'prettier/prettier': [
+        1,
+        {
+          endOfLine: 'lf',
+          printWidth: 180,
+          semi: true,
+          singleQuote: true,
+          tabWidth: 2,
+          trailingComma: 'es5',
         },
+      ],
     },
-    // Prettier
-    {
-        plugins: {
-            prettier,
-        },
-        rules: {
-            'prettier/prettier': [
-                1,
-                {
-                    endOfLine: 'lf',
-                    printWidth: 180,
-                    semi: true,
-                    singleQuote: true,
-                    tabWidth: 2,
-                    trailingComma: 'es5',
-                },
-            ],
-        },
+  },
+  // Unicorn
+  {
+    plugins: {
+      unicorn: unicornPlugin,
     },
-    // Unicorn
-    {
-        plugins: {
-            unicorn: unicornPlugin,
-        },
-        rules: {
-            'unicorn/empty-brace-spaces': 'off',
-            'unicorn/no-null': 'off',
-        },
+    rules: {
+      'unicorn/empty-brace-spaces': 'off',
+      'unicorn/no-null': 'off',
     },
-    pluginJs.configs.recommended,
-    ...tsPlugin.configs.recommended,
+  },
+  pluginJs.configs.recommended,
+  ...tsPlugin.configs.recommended,
 ];
