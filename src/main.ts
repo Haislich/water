@@ -1,27 +1,15 @@
 import { mat4 } from 'gl-matrix';
+import { FragmentShader, ShaderProgram, VertexShader } from './shader';
 const drawScene = (gl: WebGL2RenderingContext, canvas: HTMLCanvasElement): void => {
   // Shader creation
-  const vertexShader = gl.createShader(gl.VERTEX_SHADER);
-  if (!vertexShader) throw new Error('Unable to create vertex Shaders');
-  gl.shaderSource(vertexShader, vert.trim());
-  gl.compileShader(vertexShader);
-  if (!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)) throw new Error('Error compiling shader');
+  const vertexShader = new VertexShader(gl, vert);
+  const fragmentShader = new FragmentShader(gl, frag);
+  const shaderProgram = new ShaderProgram(gl, vertexShader, fragmentShader);
 
-  const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
-  if (!fragmentShader) throw new Error('Unable to instantiate Shaders');
-  gl.shaderSource(fragmentShader, frag.trim());
-  gl.compileShader(fragmentShader);
-  // Throwing this error might be more suitable: gl.getShaderInfoLog(shader)
-  if (!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)) throw new Error('Error compiling shader');
+  shaderProgram.use();
 
-  const program = gl.createProgram();
-  gl.attachShader(program, vertexShader);
-  gl.attachShader(program, fragmentShader);
-  gl.linkProgram(program);
-  gl.useProgram(program);
-
-  const aVertexPosition = gl.getAttribLocation(program, 'aVertexPosition');
-  const uProjectionMatrix = gl.getUniformLocation(program, 'uProjectionMatrix');
+  const aVertexPosition = gl.getAttribLocation(shaderProgram.program, 'aVertexPosition');
+  const uProjectionMatrix = gl.getUniformLocation(shaderProgram.program, 'uProjectionMatrix');
 
   const vertices = [-0.5, 0.5, 0, -0.5, -0.5, 0, 0.5, -0.5, 0, 0.5, 0.5, 0];
 

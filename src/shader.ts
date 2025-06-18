@@ -34,13 +34,13 @@ export class FragmentShader extends Shader {
 export class ShaderProgram {
   private _program: WebGLProgram;
   private gl: WebGL2RenderingContext;
-  private vertexShader: VertexShader;
-  private fragmentShader: FragmentShader;
+  // private vertexShader: VertexShader;
+  // private fragmentShader: FragmentShader;
 
   constructor(gl: WebGL2RenderingContext, vertexShader: VertexShader, fragmentShader: FragmentShader) {
     this.gl = gl;
-    this.vertexShader = vertexShader;
-    this.fragmentShader = fragmentShader;
+    // this.vertexShader = vertexShader;
+    // this.fragmentShader = fragmentShader;
     this._program = gl.createProgram();
     gl.attachShader(this._program, vertexShader.handle);
     gl.attachShader(this._program, fragmentShader.handle);
@@ -50,6 +50,9 @@ export class ShaderProgram {
       gl.deleteProgram(this._program);
       throw new Error(error ?? 'Unknown program linking error');
     }
+  }
+  get program(): WebGLProgram {
+    return this._program;
   }
   use(): void {
     this.gl.useProgram(this._program);
@@ -66,8 +69,6 @@ export class ShaderProgram {
     return location;
   }
   dispose(): void {
-    this.gl.deleteShader(this.vertexShader);
-    this.gl.deleteShader(this.fragmentShader);
     this.gl.deleteProgram(this._program);
   }
 }
