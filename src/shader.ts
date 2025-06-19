@@ -1,3 +1,4 @@
+// MAybe I should find a more fitting name ?
 class Shader {
   private shader: WebGLShader;
   private gl: WebGL2RenderingContext;
@@ -34,13 +35,9 @@ export class FragmentShader extends Shader {
 export class ShaderProgram {
   private _program: WebGLProgram;
   private gl: WebGL2RenderingContext;
-  // private vertexShader: VertexShader;
-  // private fragmentShader: FragmentShader;
 
   constructor(gl: WebGL2RenderingContext, vertexShader: VertexShader, fragmentShader: FragmentShader) {
     this.gl = gl;
-    // this.vertexShader = vertexShader;
-    // this.fragmentShader = fragmentShader;
     this._program = gl.createProgram();
     gl.attachShader(this._program, vertexShader.handle);
     gl.attachShader(this._program, fragmentShader.handle);

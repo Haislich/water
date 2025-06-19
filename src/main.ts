@@ -9,9 +9,9 @@ const drawScene = (gl: WebGL2RenderingContext, canvas: HTMLCanvasElement): void 
   shaderProgram.use();
 
   const aVertexPosition = gl.getAttribLocation(shaderProgram.program, 'aVertexPosition');
-  const uProjectionMatrix = gl.getUniformLocation(shaderProgram.program, 'uProjectionMatrix');
+  const uProjectionMatrix = shaderProgram.getUniformLocation('uProjectionMatrix');
 
-  const vertices = [-0.5, 0.5, 0, -0.5, -0.5, 0, 0.5, -0.5, 0, 0.5, 0.5, 0];
+  const vertices = [-0.5, 0.5, -2, -0.5, -0.5, -2, 0.5, -0.5, -2, 0.5, 0.5, -2];
 
   const indices = [0, 1, 2, 0, 2, 3];
 
@@ -76,8 +76,7 @@ in vec3 aVertexPosition;
 uniform mat4 uProjectionMatrix;
 
 void main(void){
-  // * uProjection
-  gl_Position =  vec4(aVertexPosition, 1.0);
+  gl_Position = uProjectionMatrix * vec4(aVertexPosition, 1.0);
 }
 `;
 
@@ -87,6 +86,8 @@ const frag = `
 
     // Color that is the result of this shader
     out vec4 fragColor;
+    uniform mat4 uProjectionMatrix;
+
 
     void main(void) {
       // Set the result as red
