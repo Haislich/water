@@ -22,6 +22,8 @@ export default [
       'no-console': ['error'],
       'prefer-template': 'error',
       quotes: ['error', 'single', { avoidEscape: true }],
+      '@typescript-eslint/explicit-member-accessibility': 'off',
+      // '@typescript-eslint/parameter-properties': 'error',
     },
   },
   // TypeScript Eslint
