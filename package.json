@@ -21,6 +21,7 @@
     "vite-plugin-glsl": "^1.5.0"
   },
   "dependencies": {
-    "gl-matrix": "^3.4.3"
+    "gl-matrix": "^3.4.3",
+    "vite-plugin-string": "^1.2.3"
   }
 }

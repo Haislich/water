@@ -1,19 +1,29 @@
 import { mat4 } from 'gl-matrix';
+import waterFrag from '../shaders/water.frag';
+import waterVert from '../shaders/water.vert';
 import { FragmentShader, ShaderProgram, VertexShader } from './shader';
+
 const drawScene = (gl: WebGL2RenderingContext, canvas: HTMLCanvasElement): void => {
   // Shader creation
-  const vertexShader = new VertexShader(gl, vert);
-  const fragmentShader = new FragmentShader(gl, frag);
+  const vertexShader = new VertexShader(gl, waterVert);
+  const fragmentShader = new FragmentShader(gl, waterFrag);
   const shaderProgram = new ShaderProgram(gl, vertexShader, fragmentShader);
 
   shaderProgram.use();
 
-  const aVertexPosition = gl.getAttribLocation(shaderProgram.program, 'aVertexPosition');
+  const aVertexPosition = 0; //gl.getAttribLocation(shaderProgram.program, 'aVertexPosition');
   const uProjectionMatrix = shaderProgram.getUniformLocation('uProjectionMatrix');
 
   const vertices = [-0.5, 0.5, -2, -0.5, -0.5, -2, 0.5, -0.5, -2, 0.5, 0.5, -2];
 
   const indices = [0, 1, 2, 0, 2, 3];
+  const projectionMatrix = mat4.create();
+  const fov = Math.PI / 4;
+  const aspect = canvas.width / canvas.height;
+  // Object farther than, `far` and nearer than `near`  will get clipped
+  const near = 0.01;
+  const far = 100.0;
+  gl.uniformMatrix4fv(uProjectionMatrix, false, mat4.perspective(projectionMatrix, fov, aspect, near, far));
 
   // Setting up VBO
   const squareVertexBuffer = gl.createBuffer();
@@ -27,13 +37,6 @@ const drawScene = (gl: WebGL2RenderingContext, canvas: HTMLCanvasElement): void 
 
   gl.enableVertexAttribArray(aVertexPosition);
   gl.vertexAttribPointer(aVertexPosition, 3, gl.FLOAT, false, 0, 0);
-  const projectionMatrix = mat4.create();
-  const fov = Math.PI / 4;
-  const aspect = canvas.width / canvas.height;
-  // Object farther than, `far` and nearer than `near`  will get clipped
-  const near = 0.01;
-  const far = 100.0;
-  gl.uniformMatrix4fv(uProjectionMatrix, false, mat4.perspective(projectionMatrix, fov, aspect, near, far));
 
   //Setting up IBO
   const squareIndexBuffer = gl.createBuffer();
@@ -67,30 +70,3 @@ window.onload = (): void => {
   if (!gl) throw new Error('WebGL2 not supported');
   drawScene(gl, canvas);
 };
-
-const vert = `
-#version 300 es
-precision mediump float;
-
-in vec3 aVertexPosition;
-uniform mat4 uProjectionMatrix;
-
-void main(void){
-  gl_Position = uProjectionMatrix * vec4(aVertexPosition, 1.0);
-}
-`;
-
-const frag = `
-#version 300 es
-    precision mediump float;
-
-    // Color that is the result of this shader
-    out vec4 fragColor;
-    uniform mat4 uProjectionMatrix;
-
-
-    void main(void) {
-      // Set the result as red
-      fragColor = vec4(1.0, 0.0, 0.0, 1.0);
-    }
-`;

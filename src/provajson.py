@@ -2,8 +2,8 @@ vertices = [
     (0, 0),
     (1, 0),
     (0, 0),  # Dupliato
-    (0, 0),  # Dupliato ancroa
     (2, 2),
+    (0, 0),  # Dupliato ancroa
 ]
 # Risultato aspettatato:
 # - vertices = [(0,0),(1,0),(2,2)]
