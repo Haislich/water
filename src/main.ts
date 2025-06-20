@@ -16,7 +16,7 @@ const drawScene = (gl: WebGL2RenderingContext, canvas: HTMLCanvasElement): void 
   const fragmentShader = new FragmentShader(gl, waterFrag);
   const shaderProgram = new ShaderProgram(gl, vertexShader, fragmentShader);
 
-  shaderProgram.use();
+  shaderProgram.bind();
   const uProjectionMatrix = shaderProgram.getUniformLocation('uProjectionMatrix');
   const projectionMatrix = mat4.create();
   const fov = Math.PI / 6;
@@ -30,7 +30,7 @@ const drawScene = (gl: WebGL2RenderingContext, canvas: HTMLCanvasElement): void 
   const modelViewMatrix = mat4.create();
 
   // Step 1: pull camera back 4 units
-  mat4.translate(modelViewMatrix, modelViewMatrix, [0, -0, -5]);
+  mat4.translate(modelViewMatrix, modelViewMatrix, [0, -0, -3]);
 
   // Step 2: rotate around X and Y
   mat4.rotateX(modelViewMatrix, modelViewMatrix, -angleX);

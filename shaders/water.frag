@@ -8,5 +8,5 @@ uniform mat4 uProjectionMatrix;
 
 void main(void) {
   // Set the result as red
-  fragColor = vec4(1.0, 0.0, 0.0, 1.0);
+  fragColor = vec4(0.0f, 0.18f, 1.0f, 1.0f);
 }

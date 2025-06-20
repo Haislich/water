@@ -1,0 +1,1 @@
+The vertex shader only defines the screen-space projection of geometry (e.g., two triangles covering a quad). The heavy lifting happens in the fragment shader, which is invoked per rasterized pixel — which aligns to the framebuffer’s resolution, not the mesh's geometry density.

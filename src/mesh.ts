@@ -78,7 +78,7 @@ export class Mesh {
   private count: number;
   private gl: WebGL2RenderingContext;
 
-  constructor(gl: WebGL2RenderingContext, geometry: IndexedGeometry, attribs: VertexAttrib[]) {
+  constructor(gl: WebGL2RenderingContext, geometry: IndexedGeometry) {
     this.gl = gl;
     const vertices = geometry.vertexData();
     const indices = geometry.indexData();
@@ -93,10 +93,10 @@ export class Mesh {
 
     gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
     gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
-    for (const attrib of attribs) {
-      gl.enableVertexAttribArray(attrib.location);
-      gl.vertexAttribPointer(attrib.location, attrib.size, attrib.type, attrib.normalized, attrib.stride, attrib.offset);
-    }
+
+    // When I create a mesh I only know where the triangles are
+    gl.enableVertexAttribArray(0);
+    gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
@@ -107,12 +107,7 @@ export class Mesh {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
   }
 
-  // maybe add something for scale
-  static plane(
-    gl: WebGL2RenderingContext,
-    detail: number,
-    positionLocation: number = 0 // default attribute location
-  ): Mesh {
+  static plane(gl: WebGL2RenderingContext, detail: number): Mesh {
     const vertices: number[][] = [];
     const indices: number[] = [];
 
@@ -143,9 +138,7 @@ export class Mesh {
     const geometry = new IndexedGeometry(flat, stride);
     geometry.indices = indices; // Overwrite with direct triangle indexing
 
-    const attribs = [new VertexAttrib(positionLocation, 3, gl.FLOAT, false, stride * 4, 0)];
-
-    return new Mesh(gl, geometry, attribs);
+    return new Mesh(gl, geometry);
   }
   draw(): void {
     this.gl.bindVertexArray(this.vao);

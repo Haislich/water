@@ -1,3 +1,5 @@
+import type { mat4 } from 'gl-matrix';
+
 // MAybe I should find a more fitting name ?
 class Shader {
   private shader: WebGLShader;
@@ -51,7 +53,7 @@ export class ShaderProgram {
   get program(): WebGLProgram {
     return this._program;
   }
-  use(): void {
+  bind(): void {
     this.gl.useProgram(this._program);
   }
   getUniformLocation(name: string): WebGLUniformLocation {
@@ -65,6 +67,48 @@ export class ShaderProgram {
     if (location === -1) throw new Error(`Attribute "${name}" not found`);
     return location;
   }
+  setUniform(name: string, value: number | number[] | Float32Array | mat4): void {
+    const gl = this.gl;
+    const loc = this.getUniformLocation(name);
+
+    if (typeof value === 'number') {
+      gl.uniform1f(loc, value);
+    } else if (Array.isArray(value)) {
+      switch (value.length) {
+        case 2:
+          gl.uniform2fv(loc, value);
+          break;
+        case 3:
+          gl.uniform3fv(loc, value);
+          break;
+        case 4:
+          gl.uniform4fv(loc, value);
+          break;
+        case 9:
+          gl.uniformMatrix3fv(loc, false, value);
+          break;
+        case 16:
+          gl.uniformMatrix4fv(loc, false, value);
+          break;
+        default:
+          throw new Error(`Unsupported uniform array length: ${value.length}`);
+      }
+    } else if (value instanceof Float32Array) {
+      switch (value.length) {
+        case 16:
+          gl.uniformMatrix4fv(loc, false, value);
+          break;
+        case 9:
+          gl.uniformMatrix3fv(loc, false, value);
+          break;
+        default:
+          throw new Error(`Unsupported Float32Array length: ${value.length}`);
+      }
+    } else {
+      throw new Error(`Unsupported uniform value: ${value}`);
+    }
+  }
+
   dispose(): void {
     this.gl.deleteProgram(this._program);
   }
