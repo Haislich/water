@@ -1,12 +1,18 @@
 #version 300 es
-precision mediump float;
+precision highp float;
 
-// Color that is the result of this shader
+uniform vec3 eye;
+uniform samplerCube sky;
+
+in vec3 worldPosition;
 out vec4 fragColor;
-uniform mat4 uProjectionMatrix;
 
+void main() {
+  vec3 viewDir = normalize(worldPosition - eye);
+  vec3 normal = vec3(0.0, 1.0, 0.0); // flat plane normal
 
-void main(void) {
-  // Set the result as red
-  fragColor = vec4(0.0f, 0.18f, 1.0f, 1.0f);
+  vec3 reflected = reflect(viewDir, normal);
+  vec3 skyColor = texture(sky, reflected).rgb;
+
+  fragColor = vec4(skyColor, 1.0);
 }

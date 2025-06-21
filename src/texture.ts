@@ -50,23 +50,82 @@ class Texture {
     }
   }
 }
+export class StaticTextureObject {
+  private gl: WebGL2RenderingContext;
+  private texture: WebGLTexture;
+  private textureUnit: number;
+  private name: string;
+  private target: GLenum;
 
-export class StaticTextureObject extends Texture {
-  constructor(
+  private constructor(gl: WebGL2RenderingContext, textureUnit: number, name: string, target: GLenum, texture: WebGLTexture) {
+    this.gl = gl;
+    this.textureUnit = textureUnit;
+    this.name = name;
+    this.target = target;
+    this.texture = texture;
+  }
+
+  static fromImage2D(
     gl: WebGL2RenderingContext,
     textureUnit: number,
     name: string,
-    data: HTMLImageElement,
+    image: HTMLImageElement,
     internalFormat: number = gl.RGBA,
     type: number = gl.UNSIGNED_BYTE,
     filter: number = gl.NEAREST
-  ) {
-    // webgl will inger the image size
-    super(gl, textureUnit, name, 0, 0, data, internalFormat, type, filter);
-    if (filter !== gl.NEAREST && filter !== gl.LINEAR) {
-      gl.bindTexture(gl.TEXTURE_2D, this.texture);
-      gl.generateMipmap(gl.TEXTURE_2D);
-      gl.bindTexture(gl.TEXTURE_2D, null);
+  ): StaticTextureObject {
+    const tex = gl.createTexture();
+    if (!tex) throw new Error('Failed to create 2D texture');
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, internalFormat, internalFormat, type, image);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.bindTexture(gl.TEXTURE_2D, null);
+    return new StaticTextureObject(gl, textureUnit, name, gl.TEXTURE_2D, tex);
+  }
+
+  static fromCubemapImages(gl: WebGL2RenderingContext, textureUnit: number, name: string, faceImages: Record<string, HTMLImageElement>): StaticTextureObject {
+    const tex = gl.createTexture();
+    if (!tex) throw new Error('Failed to create cubemap texture');
+
+    gl.bindTexture(gl.TEXTURE_CUBE_MAP, tex);
+
+    // Match Evan's behavior
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+    const targets = [
+      { key: 'xpos', target: gl.TEXTURE_CUBE_MAP_POSITIVE_X },
+      { key: 'xneg', target: gl.TEXTURE_CUBE_MAP_NEGATIVE_X },
+      { key: 'ypos', target: gl.TEXTURE_CUBE_MAP_POSITIVE_Y },
+      { key: 'yneg', target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Y },
+      { key: 'zpos', target: gl.TEXTURE_CUBE_MAP_POSITIVE_Z },
+      { key: 'zneg', target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Z },
+    ];
+
+    for (const { key, target } of targets) {
+      const image = faceImages[key];
+      if (!image) throw new Error(`Missing cubemap face image for key "${key}"`);
+
+      gl.texImage2D(target, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+    }
+
+    gl.bindTexture(gl.TEXTURE_CUBE_MAP, null);
+    return new StaticTextureObject(gl, textureUnit, name, gl.TEXTURE_CUBE_MAP, tex);
+  }
+
+  bind(program: WebGLProgram): void {
+    this.gl.activeTexture(this.gl.TEXTURE0 + this.textureUnit);
+    this.gl.bindTexture(this.target, this.texture);
+
+    const location = this.gl.getUniformLocation(program, this.name);
+    if (location !== null) {
+      this.gl.uniform1i(location, this.textureUnit);
     }
   }
 }

@@ -53,7 +53,7 @@ export class ShaderProgram {
   get program(): WebGLProgram {
     return this._program;
   }
-  bind(): void {
+  use(): void {
     this.gl.useProgram(this._program);
   }
   getUniformLocation(name: string): WebGLUniformLocation {
@@ -72,7 +72,12 @@ export class ShaderProgram {
     const loc = this.getUniformLocation(name);
 
     if (typeof value === 'number') {
-      gl.uniform1f(loc, value);
+      // Use 1i for texture units or explicitly integer uniforms
+      if (Number.isInteger(value)) {
+        this.gl.uniform1i(loc, value);
+      } else {
+        this.gl.uniform1f(loc, value);
+      }
     } else if (Array.isArray(value)) {
       switch (value.length) {
         case 2:
