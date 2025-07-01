@@ -5,14 +5,14 @@ export class Water {
     public geometry;
     public material;
     public mesh;
-    constructor() {
+    constructor(light: number[], tiles: THREE.Texture, textureCube: THREE.CubeTexture) {
         this.geometry = new THREE.PlaneGeometry(2, 2, 200, 200);
 
         this.material = new THREE.RawShaderMaterial({
             uniforms: {
-                // light: { value: light },
-                // tiles: { value: tiles },
-                // sky: { value: textureCube },
+                light: { value: light },
+                tiles: { value: tiles },
+                sky: { value: textureCube },
                 water: { value: null },
                 causticTex: { value: null },
                 underwater: { value: false },

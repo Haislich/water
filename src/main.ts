@@ -1,9 +1,11 @@
 import GUI from 'lil-gui';
-// import * as THREE from 'three';
+import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { EXRLoader } from 'three/addons/loaders/EXRLoader.js';
+// import { EXRLoader } from 'three/addons/loaders/EXRLoader.js';
 
 import { Water } from './water';
+import { Caustics } from './caustics';
+import { WaterSimulation } from './waterSimulation';
 // import { Water } from 'src/water.ts';
 const gui = new GUI({ width: 340 });
 
@@ -51,7 +53,7 @@ loadFile('shaders/utils.glsl').then((utils) => {
     camera.position.set(0.426, 0.677, -2.095);
     camera.rotation.set(2.828, 0.191, 3.108);
 
-    const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+    const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true });
     renderer.setSize(width, height);
     renderer.autoClear = false;
 
@@ -59,24 +61,24 @@ loadFile('shaders/utils.glsl').then((utils) => {
     const light = [0.7559289460184544, 0.7559289460184544, -0.3779644730092272];
 
     // Create mouse Controls
-    const controls = new THREE.TrackballControls(camera, canvas);
-
-    controls.screen.width = width;
-    controls.screen.height = height;
+    const controls = new OrbitControls(camera, canvas);
 
     controls.rotateSpeed = 2.5;
     controls.zoomSpeed = 1.2;
     controls.panSpeed = 0.9;
-    controls.dynamicDampingFactor = 0.9;
-
     // Ray caster
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
     const targetgeometry = new THREE.PlaneGeometry(2, 2);
-    for (const vertex of targetgeometry.vertices) {
-        vertex.z = -vertex.y;
-        vertex.y = 0;
+    const position = targetgeometry.attributes.position;
+
+    for (let i = 0; i < position.count; i++) {
+        const y = position.getY(i);
+        position.setY(i, 0); // y = 0
+        position.setZ(i, -y); // z = -originalY
     }
+
+    position.needsUpdate = true;
     const targetmesh = new THREE.Mesh(targetgeometry);
 
     // Textures
@@ -87,128 +89,6 @@ loadFile('shaders/utils.glsl').then((utils) => {
     const textureloader = new THREE.TextureLoader();
 
     const tiles = textureloader.load('tiles.jpg');
-
-    class WaterSimulation {
-        constructor() {
-            this._camera = new THREE.OrthographicCamera(0, 1, 1, 0, 0, 2000);
-
-            this._geometry = new THREE.PlaneBufferGeometry(2, 2);
-
-            this._textureA = new THREE.WebGLRenderTarget(256, 256, { type: THREE.FloatType });
-            this._textureB = new THREE.WebGLRenderTarget(256, 256, { type: THREE.FloatType });
-            this.texture = this._textureA;
-
-            const shadersPromises = [
-                loadFile('shaders/simulation/vertex.glsl'),
-                loadFile('shaders/simulation/drop_fragment.glsl'),
-                loadFile('shaders/simulation/normal_fragment.glsl'),
-                loadFile('shaders/simulation/update_fragment.glsl'),
-            ];
-
-            this.loaded = Promise.all(shadersPromises).then(([vertexShader, dropFragmentShader, normalFragmentShader, updateFragmentShader]) => {
-                const dropMaterial = new THREE.RawShaderMaterial({
-                    uniforms: {
-                        center: { value: [0, 0] },
-                        radius: { value: 0 },
-                        strength: { value: 0 },
-                        texture: { value: null },
-                    },
-                    vertexShader: vertexShader,
-                    fragmentShader: dropFragmentShader,
-                });
-
-                const normalMaterial = new THREE.RawShaderMaterial({
-                    uniforms: {
-                        delta: { value: [1 / 256, 1 / 256] }, // TODO: Remove this useless uniform and hardcode it in shaders?
-                        texture: { value: null },
-                    },
-                    vertexShader: vertexShader,
-                    fragmentShader: normalFragmentShader,
-                });
-
-                const updateMaterial = new THREE.RawShaderMaterial({
-                    uniforms: {
-                        delta: { value: [1 / 256, 1 / 256] }, // TODO: Remove this useless uniform and hardcode it in shaders?
-                        texture: { value: null },
-                    },
-                    vertexShader: vertexShader,
-                    fragmentShader: updateFragmentShader,
-                });
-
-                this._dropMesh = new THREE.Mesh(this._geometry, dropMaterial);
-                this._normalMesh = new THREE.Mesh(this._geometry, normalMaterial);
-                this._updateMesh = new THREE.Mesh(this._geometry, updateMaterial);
-            });
-        }
-
-        // Add a drop of water at the (x, y) coordinate (in the range [-1, 1])
-        addDrop(renderer, x, y, radius, strength) {
-            this._dropMesh.material.uniforms['center'].value = [x, y];
-            this._dropMesh.material.uniforms['radius'].value = radius;
-            this._dropMesh.material.uniforms['strength'].value = strength;
-
-            this._render(renderer, this._dropMesh);
-        }
-
-        stepSimulation(renderer) {
-            this._render(renderer, this._updateMesh);
-        }
-
-        updateNormals(renderer) {
-            this._render(renderer, this._normalMesh);
-        }
-
-        _render(renderer, mesh) {
-            // Swap textures
-            const oldTexture = this.texture;
-            const newTexture = this.texture === this._textureA ? this._textureB : this._textureA;
-
-            mesh.material.uniforms['texture'].value = oldTexture.texture;
-
-            renderer.setRenderTarget(newTexture);
-
-            // TODO Camera is useless here, what should be done?
-            renderer.render(mesh, this._camera);
-
-            this.texture = newTexture;
-        }
-    }
-
-    class Caustics {
-        constructor(lightFrontGeometry) {
-            this._camera = new THREE.OrthographicCamera(0, 1, 1, 0, 0, 2000);
-
-            this._geometry = lightFrontGeometry;
-
-            this.texture = new THREE.WebGLRenderTarget(1024, 1024, { type: THREE.UNSIGNED_BYTE });
-
-            const shadersPromises = [loadFile('shaders/caustics/vertex.glsl'), loadFile('shaders/caustics/fragment.glsl')];
-
-            this.loaded = Promise.all(shadersPromises).then(([vertexShader, fragmentShader]) => {
-                const material = new THREE.RawShaderMaterial({
-                    uniforms: {
-                        light: { value: light },
-                        water: { value: null },
-                    },
-                    vertexShader: vertexShader,
-                    fragmentShader: fragmentShader,
-                });
-
-                this._causticMesh = new THREE.Mesh(this._geometry, material);
-            });
-        }
-
-        update(renderer, waterTexture) {
-            this._causticMesh.material.uniforms['water'].value = waterTexture;
-
-            renderer.setRenderTarget(this.texture);
-            renderer.setClearColor(black, 0);
-            renderer.clear();
-
-            // TODO Camera is useless here, what should be done?
-            renderer.render(this._causticMesh, this._camera);
-        }
-    }
 
     class Pool {
         constructor() {
@@ -249,40 +129,10 @@ loadFile('shaders/utils.glsl').then((utils) => {
         }
     }
 
-    class Debug {
-        constructor() {
-            this._camera = new THREE.OrthographicCamera(0, 1, 1, 0, 0, 1);
-            this._geometry = new THREE.PlaneBufferGeometry();
-
-            const shadersPromises = [loadFile('shaders/debug/vertex.glsl'), loadFile('shaders/debug/fragment.glsl')];
-
-            this.loaded = Promise.all(shadersPromises).then(([vertexShader, fragmentShader]) => {
-                this._material = new THREE.RawShaderMaterial({
-                    uniforms: {
-                        texture: { value: null },
-                    },
-                    vertexShader: vertexShader,
-                    fragmentShader: fragmentShader,
-                });
-
-                this._mesh = new THREE.Mesh(this._geometry, this._material);
-            });
-        }
-
-        draw(renderer, texture) {
-            this._material.uniforms['texture'].value = texture;
-
-            renderer.setRenderTarget(null);
-            renderer.render(this._mesh, this._camera);
-        }
-    }
-
     const waterSimulation = new WaterSimulation();
-    const water = new Water();
+    const water = new Water(light, tiles, textureCube);
     const caustics = new Caustics(water.geometry);
     const pool = new Pool();
-
-    const debug = new Debug();
 
     // Main rendering loop
     function animate() {
@@ -294,8 +144,6 @@ loadFile('shaders/utils.glsl').then((utils) => {
         caustics.update(renderer, waterTexture);
 
         const causticsTexture = caustics.texture.texture;
-
-        // debug.draw(renderer, causticsTexture);
 
         renderer.setRenderTarget(null);
         renderer.setClearColor(white, 1);
@@ -324,7 +172,7 @@ loadFile('shaders/utils.glsl').then((utils) => {
         }
     }
 
-    const loaded = [waterSimulation.loaded, caustics.loaded, water.loaded, pool.loaded, debug.loaded];
+    const loaded = [waterSimulation.loaded, caustics.loaded, water.loaded, pool.loaded];
 
     Promise.all(loaded).then(() => {
         canvas.addEventListener('mousemove', { handleEvent: onMouseMove });

@@ -1,14 +1,12 @@
+#extension GL_OES_standard_derivatives : enable
 precision highp float;
 precision highp int;
-
-#extension GL_OES_standard_derivatives : enable
 
 #include <utils>
 
 varying vec3 oldPos;
 varying vec3 newPos;
 varying vec3 ray;
-
 
 void main() {
   /* if the triangle gets smaller, it gets brighter, and vice versa */
