@@ -4,9 +4,10 @@ import simulationVert from '../shaders/simulation/vertex.glsl';
 import dropFrag from '../shaders/simulation/drop_fragment.glsl';
 import updateFrag from '../shaders/simulation/update_fragment.glsl';
 import normalFrag from '../shaders/simulation/normal_fragment.glsl';
+import { CAMERA, RENDERER } from './constants';
 
 export class WaterSimulation {
-    private camera;
+    // private camera;
     private geometry;
     private textureA;
     private textureB;
@@ -15,10 +16,7 @@ export class WaterSimulation {
     public normalMesh;
     public updateMesh;
     constructor() {
-        this.camera = new THREE.OrthographicCamera(0, 1, 1, 0, 0, 2000);
-
         this.geometry = new THREE.PlaneGeometry(2, 2);
-
         this.textureA = new THREE.WebGLRenderTarget(256, 256, {
             type: THREE.FloatType,
             format: THREE.RGBAFormat,
@@ -68,32 +66,36 @@ export class WaterSimulation {
     }
 
     // Add a drop of water at the (x, y) coordinate (in the range [-1, 1])
-    addDrop(renderer, x, y, radius, strength) {
+    addDrop(x, y, radius, strength) {
         this.dropMesh.material.uniforms['center'].value = [x, y];
         this.dropMesh.material.uniforms['radius'].value = radius;
         this.dropMesh.material.uniforms['strength'].value = strength;
 
-        this._render(renderer, this.dropMesh);
+        this._render(this.dropMesh);
     }
 
-    stepSimulation(renderer) {
-        this._render(renderer, this.updateMesh);
+    stepSimulation() {
+        this._render(this.updateMesh);
     }
 
-    updateNormals(renderer) {
-        this._render(renderer, this.normalMesh);
+    updateNormals() {
+        this._render(this.normalMesh);
     }
 
-    _render(renderer: THREE.WebGLRenderer, mesh: THREE.Mesh) {
+    _render(mesh: THREE.Mesh) {
         // Swap textures
         const oldTexture = this.texture;
         const newTexture = this.texture === this.textureA ? this.textureB : this.textureA;
 
         mesh.material.uniforms['texture'].value = oldTexture.texture;
 
-        renderer.setRenderTarget(newTexture);
+        RENDERER.setRenderTarget(newTexture);
 
-        renderer.render(mesh, this.camera);
+        RENDERER.render(
+            mesh,
+
+            CAMERA
+        );
 
         this.texture = newTexture;
     }

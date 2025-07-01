@@ -1,4 +1,3 @@
-#extension GL_OES_standard_derivatives : enable
 precision highp float;
 precision highp int;
 
@@ -10,8 +9,10 @@ varying vec3 ray;
 
 void main() {
   /* if the triangle gets smaller, it gets brighter, and vice versa */
-  float oldArea = length(dFdx(oldPos)) * length(dFdy(oldPos));
-  float newArea = length(dFdx(newPos)) * length(dFdy(newPos));
+  // float oldArea = length(dFdx(oldPos)) * length(dFdy(oldPos));
+  // float newArea = length(dFdx(newPos)) * length(dFdy(newPos));
+  float oldArea = 1.;
+  float newArea = 1.;
   gl_FragColor = vec4(oldArea / newArea * 0.2, 1.0, 0.0, 0.0);
 
   vec3 refractedLight = refract(-light, vec3(0.0, 1.0, 0.0), IOR_AIR / IOR_WATER);

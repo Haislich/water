@@ -8,6 +8,7 @@ import { Caustics } from './caustics';
 import { WaterSimulation } from './waterSimulation';
 import { Pool } from './pool';
 import utils from '../shaders/utils.glsl';
+import { CAMERA, CANVAS, RENDERER } from './constants';
 const gui = new GUI({ width: 340 });
 
 const description = document.createElement('div');
@@ -22,33 +23,18 @@ description.style.color = '#ccc';
 
 // Inject into GUI
 gui.domElement.prepend(description);
-const canvas = document.getElementById('canvas')! as HTMLCanvasElement;
-
-const width = canvas.width;
-const height = canvas.height;
-
-const white = new THREE.Color('white');
 
 (THREE.ShaderChunk as Record<string, string>)['utils'] = utils;
 
 // Create Renderer
-const camera = new THREE.PerspectiveCamera(75, width / height, 0.01, 100);
-camera.position.set(0.426, 0.677, -2.095);
-camera.rotation.set(2.828, 0.191, 3.108);
-
-const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true });
-renderer.setSize(width, height);
-renderer.autoClear = false;
-
-// Light direction
-const light = [0.7559289460184544, 0.7559289460184544, -0.3779644730092272];
 
 // Create mouse Controls
-const controls = new OrbitControls(camera, canvas);
+const controls = new OrbitControls(CAMERA, CANVAS);
 
 controls.rotateSpeed = 2.5;
 controls.zoomSpeed = 1.2;
 controls.panSpeed = 0.9;
+
 // Ray caster
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
@@ -64,61 +50,50 @@ for (let i = 0; i < position.count; i++) {
 position.needsUpdate = true;
 const targetmesh = new THREE.Mesh(targetgeometry);
 
-// Textures
-const cubetextureloader = new THREE.CubeTextureLoader();
-
-const textureCube = cubetextureloader.load(['xpos.jpg', 'xneg.jpg', 'ypos.jpg', 'ypos.jpg', 'zpos.jpg', 'zneg.jpg']);
-
-const textureloader = new THREE.TextureLoader();
-
-const tiles = textureloader.load('tiles.jpg');
-
 const waterSimulation = new WaterSimulation();
-const water = new Water(light, tiles, textureCube);
+const water = new Water();
 const caustics = new Caustics(water.geometry);
-const pool = new Pool(light, tiles);
+const pool = new Pool();
 
 // Main rendering loop
 const animate = (): void => {
-    waterSimulation.stepSimulation(renderer);
-    waterSimulation.updateNormals(renderer);
+    waterSimulation.stepSimulation();
+    waterSimulation.updateNormals();
 
     const waterTexture = waterSimulation.texture.texture;
 
-    caustics.update(renderer, waterTexture);
+    caustics.update(waterTexture);
 
     const causticsTexture = caustics.texture.texture;
 
-    renderer.setRenderTarget(null);
-    renderer.setClearColor(white, 1);
-    renderer.clear();
+    RENDERER.setRenderTarget(null);
+    // renderer.setClearColor(white, 1);
+    RENDERER.clear();
 
-    water.draw(camera, renderer, waterTexture, causticsTexture);
-    pool.draw(camera, renderer, waterTexture, causticsTexture);
+    water.draw(waterTexture, causticsTexture);
+    pool.draw(waterTexture, causticsTexture);
 
     controls.update();
 
     window.requestAnimationFrame(animate);
 };
-
+const rect = CANVAS.getBoundingClientRect();
 const onMouseMove = (event: MouseEvent): void => {
-    const rect = canvas.getBoundingClientRect();
+    mouse.x = ((event.clientX - rect.left) * 2) / CANVAS.width - 1;
+    mouse.y = (-(event.clientY - rect.top) * 2) / CANVAS.height + 1;
 
-    mouse.x = ((event.clientX - rect.left) * 2) / width - 1;
-    mouse.y = (-(event.clientY - rect.top) * 2) / height + 1;
-
-    raycaster.setFromCamera(mouse, camera);
+    raycaster.setFromCamera(mouse, CAMERA);
 
     const intersects = raycaster.intersectObject(targetmesh);
 
     for (const intersect of intersects) {
-        waterSimulation.addDrop(renderer, intersect.point.x, intersect.point.z, 0.03, 0.04);
+        waterSimulation.addDrop(intersect.point.x, intersect.point.z, 0.03, 0.04);
     }
 };
 
-canvas.addEventListener('mousemove', { handleEvent: onMouseMove });
+CANVAS.addEventListener('mousemove', { handleEvent: onMouseMove });
 for (let i = 0; i < 20; i++) {
-    waterSimulation.addDrop(renderer, Math.random() * 2 - 1, Math.random() * 2 - 1, 0.03, i & 1 ? 0.02 : -0.02);
+    waterSimulation.addDrop(Math.random() * 2 - 1, Math.random() * 2 - 1, 0.03, i & 1 ? 0.02 : -0.02);
 }
 
 animate();

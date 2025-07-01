@@ -1,12 +1,13 @@
 import * as THREE from 'three';
 import poolVert from '../shaders/pool/vertex.glsl';
 import poolFrag from '../shaders/pool/fragment.glsl';
+import { CAMERA, LIGHT, RENDERER, TILES } from './constants';
 
 export class Pool {
     private geometry;
     private material;
     private mesh;
-    constructor(light, tiles) {
+    constructor() {
         this.geometry = new THREE.BufferGeometry();
         const vertices = new Float32Array([
             -1, -1, -1, -1, -1, 1, -1, 1, -1, -1, 1, 1, 1, -1, -1, 1, 1, -1, 1, -1, 1, 1, 1, 1, -1, -1, -1, 1, -1, -1, -1, -1, 1, 1, -1, 1, -1, 1, -1, -1, 1, 1, 1, 1, -1, 1, 1, 1,
@@ -19,8 +20,8 @@ export class Pool {
 
         this.material = new THREE.RawShaderMaterial({
             uniforms: {
-                light: { value: light },
-                tiles: { value: tiles },
+                light: { value: LIGHT },
+                tiles: { value: TILES },
                 water: { value: null },
                 causticTex: { value: null },
             },
@@ -30,12 +31,13 @@ export class Pool {
         this.material.side = THREE.FrontSide;
 
         this.mesh = new THREE.Mesh(this.geometry, this.material);
+        this.mesh.scale.setScalar(2);
     }
 
-    draw(camera, renderer, waterTexture, causticsTexture) {
+    draw(waterTexture, causticsTexture) {
         this.material.uniforms['water'].value = waterTexture;
         this.material.uniforms['causticTex'].value = causticsTexture;
 
-        renderer.render(this.mesh, camera);
+        RENDERER.render(this.mesh, CAMERA);
     }
 }
