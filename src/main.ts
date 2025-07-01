@@ -1,7 +1,10 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { EXRLoader } from 'three/addons/loaders/EXRLoader.js';
 import GUI from 'lil-gui';
 
+import waterVertSrc from '../shaders/water/vertex.glsl';
+import waterFragSrc from '../shaders/water/fragment.glsl';
 /**
  * Base
  */
@@ -10,7 +13,6 @@ const gui = new GUI({ width: 340 });
 
 // Canvas
 const canvas = document.querySelector('canvas.webgl')! as HTMLCanvasElement;
-
 
 // Scene
 const scene = new THREE.Scene();
@@ -22,7 +24,19 @@ const scene = new THREE.Scene();
 const waterGeometry = new THREE.PlaneGeometry(2, 2, 128, 128);
 
 // Material
-const waterMaterial = new THREE.MeshBasicMaterial();
+const waterMaterial = new THREE.ShaderMaterial({
+  vertexShader: waterVertSrc,
+  fragmentShader: waterFragSrc,
+  side: THREE.DoubleSide,
+  uniforms: {
+    uWaveElevation: { value: 0.2 },
+    uWaveFrequencies: {
+      value: new THREE.Vector2(4, 1.5),
+    },
+  },
+});
+gui.add(waterMaterial, 'wireframe');
+gui.add(waterMaterial.uniforms.uWaveElevation, 'value').min(0).max(1).step(0.001).name('Wave elevation');
 
 // Mesh
 const water = new THREE.Mesh(waterGeometry, waterMaterial);
@@ -75,10 +89,10 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 /**
  * Animate
  */
-const clock = new THREE.Clock();
+// const clock = new THREE.Clock();
 
 const tick = (): void => {
-  const elapsedTime = clock.getElapsedTime();
+  // const elapsedTime = clock.getElapsedTime();
 
   // Update controls
   controls.update();

@@ -1,16 +1,37 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Water simulation</title>
-  <link rel="stylesheet" href="./src/style.css">
+  <title>Water Simulation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css">
+
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/three@v0.113.0"></script>
+  <script type="text/javascript"
+    src="https://cdn.jsdelivr.net/npm/three@v0.113.0/examples/js/controls/TrackballControls.js"></script>
 </head>
 
 <body>
-  <canvas class="webgl"></canvas>
-  <script type="module" src="./src/main.ts"></script>
+  <section class="section">
+    <div class="container">
+
+
+
+      <div class="columns">
+        <div class="column">
+        </div>
+        <div class="column">
+          <canvas id="canvas" height="600px" width="800px" style=""></canvas>
+        </div>
+        <div class="column">
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <script type="module" src="index.js"></script>
 </body>
 
 </html>
