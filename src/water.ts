@@ -23,7 +23,6 @@ export class Water {
         });
 
         this.mesh = new THREE.Mesh(this.geometry, this.material);
-        this.mesh.scale.setScalar(2);
     }
 
     draw(waterTexture: THREE.Texture, causticsTexture: THREE.Texture): void {

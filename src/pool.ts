@@ -31,10 +31,9 @@ export class Pool {
         this.material.side = THREE.FrontSide;
 
         this.mesh = new THREE.Mesh(this.geometry, this.material);
-        this.mesh.scale.setScalar(2);
     }
 
-    draw(waterTexture, causticsTexture) {
+    draw(waterTexture: THREE.Texture, causticsTexture: THREE.Texture): void {
         this.material.uniforms['water'].value = waterTexture;
         this.material.uniforms['causticTex'].value = causticsTexture;
 

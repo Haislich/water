@@ -91,7 +91,7 @@ const onMouseMove = (event: MouseEvent): void => {
     }
 };
 
-CANVAS.addEventListener('mousemove', { handleEvent: onMouseMove });
+CANVAS.addEventListener('mousemove', onMouseMove);
 for (let i = 0; i < 20; i++) {
     waterSimulation.addDrop(Math.random() * 2 - 1, Math.random() * 2 - 1, 0.03, i & 1 ? 0.02 : -0.02);
 }

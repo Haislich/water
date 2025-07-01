@@ -43,7 +43,6 @@ export class WaterSimulation {
 
         const normalMaterial = new THREE.RawShaderMaterial({
             uniforms: {
-                delta: { value: [1 / 256, 1 / 256] }, // TODO: Remove this useless uniform and hardcode it in shaders?
                 texture: { value: null },
             },
             vertexShader: simulationVert,
@@ -52,7 +51,6 @@ export class WaterSimulation {
 
         const updateMaterial = new THREE.RawShaderMaterial({
             uniforms: {
-                delta: { value: [1 / 256, 1 / 256] }, // TODO: Remove this useless uniform and hardcode it in shaders?
                 texture: { value: null },
             },
             vertexShader: simulationVert,
@@ -65,7 +63,7 @@ export class WaterSimulation {
     }
 
     // Add a drop of water at the (x, y) coordinate (in the range [-1, 1])
-    addDrop(x, y, radius, strength) {
+    addDrop(x: number, y: number, radius: number, strength: number): void {
         this.dropMesh.material.uniforms['center'].value = [x, y];
         this.dropMesh.material.uniforms['radius'].value = radius;
         this.dropMesh.material.uniforms['strength'].value = strength;
@@ -73,15 +71,15 @@ export class WaterSimulation {
         this._render(this.dropMesh);
     }
 
-    stepSimulation() {
+    stepSimulation(): void {
         this._render(this.updateMesh);
     }
 
-    updateNormals() {
+    updateNormals(): void {
         this._render(this.normalMesh);
     }
 
-    _render(mesh: THREE.Mesh) {
+    _render(mesh: THREE.Mesh<THREE.PlaneGeometry, THREE.RawShaderMaterial, THREE.Object3DEventMap>): void {
         // Swap textures
         const oldTexture = this.texture;
         const newTexture = this.texture === this.textureA ? this.textureB : this.textureA;
@@ -90,11 +88,7 @@ export class WaterSimulation {
 
         RENDERER.setRenderTarget(newTexture);
 
-        RENDERER.render(
-            mesh,
-
-            CAMERA
-        );
+        RENDERER.render(mesh, CAMERA);
 
         this.texture = newTexture;
     }

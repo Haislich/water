@@ -3,17 +3,14 @@ precision highp int;
 
 #include <utils>
 
-varying vec3 oldPos;
 varying vec3 newPos;
-varying vec3 ray;
 
 void main() {
-  /* if the triangle gets smaller, it gets brighter, and vice versa */
+  /* if the triangle gets smaller, it gets brighter, and vice versa but it seems like EOS is not collaborating */
   // float oldArea = length(dFdx(oldPos)) * length(dFdy(oldPos));
   // float newArea = length(dFdx(newPos)) * length(dFdy(newPos));
-  float oldArea = 1.;
-  float newArea = 1.;
-  gl_FragColor = vec4(oldArea / newArea * 0.2, 1.0, 0.0, 0.0);
+  // gl_FragColor = vec4(oldArea / newArea * 0.2, 1.0, 0.0, 0.0);
+  gl_FragColor = vec4(0.2, 1.0, 0.0, 0.0);
 
   vec3 refractedLight = refract(-light, vec3(0.0, 1.0, 0.0), IOR_AIR / IOR_WATER);
 
