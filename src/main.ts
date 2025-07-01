@@ -6,6 +6,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { Water } from './water';
 import { Caustics } from './caustics';
 import { WaterSimulation } from './waterSimulation';
+import { Pool } from './pool';
 // import { Water } from 'src/water.ts';
 const gui = new GUI({ width: 340 });
 
@@ -90,45 +91,6 @@ loadFile('shaders/utils.glsl').then((utils) => {
 
     const tiles = textureloader.load('tiles.jpg');
 
-    class Pool {
-        constructor() {
-            this._geometry = new THREE.BufferGeometry();
-            const vertices = new Float32Array([
-                -1, -1, -1, -1, -1, 1, -1, 1, -1, -1, 1, 1, 1, -1, -1, 1, 1, -1, 1, -1, 1, 1, 1, 1, -1, -1, -1, 1, -1, -1, -1, -1, 1, 1, -1, 1, -1, 1, -1, -1, 1, 1, 1, 1, -1, 1, 1,
-                1, -1, -1, -1, -1, 1, -1, 1, -1, -1, 1, 1, -1, -1, -1, 1, 1, -1, 1, -1, 1, 1, 1, 1, 1,
-            ]);
-            const indices = new Uint32Array([0, 1, 2, 2, 1, 3, 4, 5, 6, 6, 5, 7, 12, 13, 14, 14, 13, 15, 16, 17, 18, 18, 17, 19, 20, 21, 22, 22, 21, 23]);
-
-            this._geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
-            this._geometry.setIndex(new THREE.BufferAttribute(indices, 1));
-
-            const shadersPromises = [loadFile('shaders/pool/vertex.glsl'), loadFile('shaders/pool/fragment.glsl')];
-
-            this.loaded = Promise.all(shadersPromises).then(([vertexShader, fragmentShader]) => {
-                this._material = new THREE.RawShaderMaterial({
-                    uniforms: {
-                        light: { value: light },
-                        tiles: { value: tiles },
-                        water: { value: null },
-                        causticTex: { value: null },
-                    },
-                    vertexShader: vertexShader,
-                    fragmentShader: fragmentShader,
-                });
-                this._material.side = THREE.FrontSide;
-
-                this._mesh = new THREE.Mesh(this._geometry, this._material);
-            });
-        }
-
-        draw(renderer, waterTexture, causticsTexture) {
-            this._material.uniforms['water'].value = waterTexture;
-            this._material.uniforms['causticTex'].value = causticsTexture;
-
-            renderer.render(this._mesh, camera);
-        }
-    }
-
     const waterSimulation = new WaterSimulation();
     const water = new Water(light, tiles, textureCube);
     const caustics = new Caustics(water.geometry);
@@ -150,7 +112,7 @@ loadFile('shaders/utils.glsl').then((utils) => {
         renderer.clear();
 
         water.draw(camera, renderer, waterTexture, causticsTexture);
-        pool.draw(renderer, waterTexture, causticsTexture);
+        pool.draw(camera, renderer, waterTexture, causticsTexture);
 
         controls.update();
 
