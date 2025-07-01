@@ -5,7 +5,8 @@ import poolFrag from '../shaders/pool/fragment.glsl';
 export class Pool {
     private geometry;
     private material;
-    constructor() {
+    private mesh;
+    constructor(light, tiles) {
         this.geometry = new THREE.BufferGeometry();
         const vertices = new Float32Array([
             -1, -1, -1, -1, -1, 1, -1, 1, -1, -1, 1, 1, 1, -1, -1, 1, 1, -1, 1, -1, 1, 1, 1, 1, -1, -1, -1, 1, -1, -1, -1, -1, 1, 1, -1, 1, -1, 1, -1, -1, 1, 1, 1, 1, -1, 1, 1, 1,
@@ -18,8 +19,8 @@ export class Pool {
 
         this.material = new THREE.RawShaderMaterial({
             uniforms: {
-                // light: { value: light },
-                // tiles: { value: tiles },
+                light: { value: light },
+                tiles: { value: tiles },
                 water: { value: null },
                 causticTex: { value: null },
             },

@@ -7,7 +7,7 @@ import { Water } from './water';
 import { Caustics } from './caustics';
 import { WaterSimulation } from './waterSimulation';
 import { Pool } from './pool';
-// import { Water } from 'src/water.ts';
+import utils from '../shaders/utils.glsl';
 const gui = new GUI({ width: 340 });
 
 const description = document.createElement('div');
@@ -27,122 +27,98 @@ const canvas = document.getElementById('canvas')! as HTMLCanvasElement;
 const width = canvas.width;
 const height = canvas.height;
 
-// Colors
-const black = new THREE.Color('black');
 const white = new THREE.Color('white');
 
-function loadFile(filename: string): Promise<string> {
-    return new Promise((resolve, reject) => {
-        // console.log(void)
-        const loader = new THREE.FileLoader();
+(THREE.ShaderChunk as Record<string, string>)['utils'] = utils;
 
-        loader.load(
-            filename,
-            (data) => resolve(data), // onLoad
-            undefined, // onProgress (optional)
-            (err) => reject(err) // onError
-        );
-    });
+// Create Renderer
+const camera = new THREE.PerspectiveCamera(75, width / height, 0.01, 100);
+camera.position.set(0.426, 0.677, -2.095);
+camera.rotation.set(2.828, 0.191, 3.108);
+
+const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true });
+renderer.setSize(width, height);
+renderer.autoClear = false;
+
+// Light direction
+const light = [0.7559289460184544, 0.7559289460184544, -0.3779644730092272];
+
+// Create mouse Controls
+const controls = new OrbitControls(camera, canvas);
+
+controls.rotateSpeed = 2.5;
+controls.zoomSpeed = 1.2;
+controls.panSpeed = 0.9;
+// Ray caster
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+const targetgeometry = new THREE.PlaneGeometry(2, 2);
+const position = targetgeometry.attributes.position;
+
+for (let i = 0; i < position.count; i++) {
+    const y = position.getY(i);
+    position.setY(i, 0); // y = 0
+    position.setZ(i, -y); // z = -originalY
 }
 
-// Shader chunks
-loadFile('shaders/utils.glsl').then((utils) => {
-    THREE.ShaderChunk['utils'] = utils;
+position.needsUpdate = true;
+const targetmesh = new THREE.Mesh(targetgeometry);
 
-    // Create Renderer
-    const camera = new THREE.PerspectiveCamera(75, width / height, 0.01, 100);
-    camera.position.set(0.426, 0.677, -2.095);
-    camera.rotation.set(2.828, 0.191, 3.108);
+// Textures
+const cubetextureloader = new THREE.CubeTextureLoader();
 
-    const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true });
-    renderer.setSize(width, height);
-    renderer.autoClear = false;
+const textureCube = cubetextureloader.load(['xpos.jpg', 'xneg.jpg', 'ypos.jpg', 'ypos.jpg', 'zpos.jpg', 'zneg.jpg']);
 
-    // Light direction
-    const light = [0.7559289460184544, 0.7559289460184544, -0.3779644730092272];
+const textureloader = new THREE.TextureLoader();
 
-    // Create mouse Controls
-    const controls = new OrbitControls(camera, canvas);
+const tiles = textureloader.load('tiles.jpg');
 
-    controls.rotateSpeed = 2.5;
-    controls.zoomSpeed = 1.2;
-    controls.panSpeed = 0.9;
-    // Ray caster
-    const raycaster = new THREE.Raycaster();
-    const mouse = new THREE.Vector2();
-    const targetgeometry = new THREE.PlaneGeometry(2, 2);
-    const position = targetgeometry.attributes.position;
+const waterSimulation = new WaterSimulation();
+const water = new Water(light, tiles, textureCube);
+const caustics = new Caustics(water.geometry);
+const pool = new Pool(light, tiles);
 
-    for (let i = 0; i < position.count; i++) {
-        const y = position.getY(i);
-        position.setY(i, 0); // y = 0
-        position.setZ(i, -y); // z = -originalY
+// Main rendering loop
+const animate = (): void => {
+    waterSimulation.stepSimulation(renderer);
+    waterSimulation.updateNormals(renderer);
+
+    const waterTexture = waterSimulation.texture.texture;
+
+    caustics.update(renderer, waterTexture);
+
+    const causticsTexture = caustics.texture.texture;
+
+    renderer.setRenderTarget(null);
+    renderer.setClearColor(white, 1);
+    renderer.clear();
+
+    water.draw(camera, renderer, waterTexture, causticsTexture);
+    pool.draw(camera, renderer, waterTexture, causticsTexture);
+
+    controls.update();
+
+    window.requestAnimationFrame(animate);
+};
+
+const onMouseMove = (event: MouseEvent): void => {
+    const rect = canvas.getBoundingClientRect();
+
+    mouse.x = ((event.clientX - rect.left) * 2) / width - 1;
+    mouse.y = (-(event.clientY - rect.top) * 2) / height + 1;
+
+    raycaster.setFromCamera(mouse, camera);
+
+    const intersects = raycaster.intersectObject(targetmesh);
+
+    for (const intersect of intersects) {
+        waterSimulation.addDrop(renderer, intersect.point.x, intersect.point.z, 0.03, 0.04);
     }
+};
 
-    position.needsUpdate = true;
-    const targetmesh = new THREE.Mesh(targetgeometry);
+canvas.addEventListener('mousemove', { handleEvent: onMouseMove });
+for (let i = 0; i < 20; i++) {
+    waterSimulation.addDrop(renderer, Math.random() * 2 - 1, Math.random() * 2 - 1, 0.03, i & 1 ? 0.02 : -0.02);
+}
 
-    // Textures
-    const cubetextureloader = new THREE.CubeTextureLoader();
-
-    const textureCube = cubetextureloader.load(['xpos.jpg', 'xneg.jpg', 'ypos.jpg', 'ypos.jpg', 'zpos.jpg', 'zneg.jpg']);
-
-    const textureloader = new THREE.TextureLoader();
-
-    const tiles = textureloader.load('tiles.jpg');
-
-    const waterSimulation = new WaterSimulation();
-    const water = new Water(light, tiles, textureCube);
-    const caustics = new Caustics(water.geometry);
-    const pool = new Pool();
-
-    // Main rendering loop
-    function animate() {
-        waterSimulation.stepSimulation(renderer);
-        waterSimulation.updateNormals(renderer);
-
-        const waterTexture = waterSimulation.texture.texture;
-
-        caustics.update(renderer, waterTexture);
-
-        const causticsTexture = caustics.texture.texture;
-
-        renderer.setRenderTarget(null);
-        renderer.setClearColor(white, 1);
-        renderer.clear();
-
-        water.draw(camera, renderer, waterTexture, causticsTexture);
-        pool.draw(camera, renderer, waterTexture, causticsTexture);
-
-        controls.update();
-
-        window.requestAnimationFrame(animate);
-    }
-
-    function onMouseMove(event) {
-        const rect = canvas.getBoundingClientRect();
-
-        mouse.x = ((event.clientX - rect.left) * 2) / width - 1;
-        mouse.y = (-(event.clientY - rect.top) * 2) / height + 1;
-
-        raycaster.setFromCamera(mouse, camera);
-
-        const intersects = raycaster.intersectObject(targetmesh);
-
-        for (const intersect of intersects) {
-            waterSimulation.addDrop(renderer, intersect.point.x, intersect.point.z, 0.03, 0.04);
-        }
-    }
-
-    const loaded = [waterSimulation.loaded, caustics.loaded, water.loaded, pool.loaded];
-
-    Promise.all(loaded).then(() => {
-        canvas.addEventListener('mousemove', { handleEvent: onMouseMove });
-
-        for (let i = 0; i < 20; i++) {
-            waterSimulation.addDrop(renderer, Math.random() * 2 - 1, Math.random() * 2 - 1, 0.03, i & 1 ? 0.02 : -0.02);
-        }
-
-        animate();
-    });
-});
+animate();
