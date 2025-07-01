@@ -7,7 +7,6 @@ import normalFrag from '../shaders/simulation/normal_fragment.glsl';
 import { CAMERA, RENDERER } from './constants';
 
 export class WaterSimulation {
-    // private camera;
     private geometry;
     private textureA;
     private textureB;
