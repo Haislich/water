@@ -10,7 +10,7 @@ export class WaterSimulation {
     private geometry;
     private textureA;
     private textureB;
-    public texture;
+    private _texture;
     public dropMesh;
     public normalMesh;
     public updateMesh;
@@ -28,7 +28,7 @@ export class WaterSimulation {
             depthBuffer: true,
             stencilBuffer: false,
         });
-        this.texture = this.textureA;
+        this._texture = this.textureA;
 
         const dropMaterial = new THREE.RawShaderMaterial({
             uniforms: {
@@ -61,7 +61,9 @@ export class WaterSimulation {
         this.normalMesh = new THREE.Mesh(this.geometry, normalMaterial);
         this.updateMesh = new THREE.Mesh(this.geometry, updateMaterial);
     }
-
+    get texture(): THREE.Texture {
+        return this._texture.texture;
+    }
     // Add a drop of water at the (x, y) coordinate (in the range [-1, 1])
     addDrop(x: number, y: number, radius: number, strength: number): void {
         this.dropMesh.material.uniforms['center'].value = [x, y];
@@ -81,8 +83,8 @@ export class WaterSimulation {
 
     _render(mesh: THREE.Mesh<THREE.PlaneGeometry, THREE.RawShaderMaterial, THREE.Object3DEventMap>): void {
         // Swap textures
-        const oldTexture = this.texture;
-        const newTexture = this.texture === this.textureA ? this.textureB : this.textureA;
+        const oldTexture = this._texture;
+        const newTexture = this._texture === this.textureA ? this.textureB : this.textureA;
 
         mesh.material.uniforms['texture'].value = oldTexture.texture;
 
@@ -90,6 +92,7 @@ export class WaterSimulation {
 
         RENDERER.render(mesh, CAMERA);
 
-        this.texture = newTexture;
+        this._texture = newTexture;
+        RENDERER.setRenderTarget(null);
     }
 }

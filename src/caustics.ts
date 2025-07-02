@@ -6,11 +6,11 @@ import { CAMERA, LIGHT, RENDERER } from './constants';
 export class Caustics {
     private geometry;
     private causticMesh;
-    public texture;
+    private _texture;
     constructor(lightFrontGeometry: THREE.PlaneGeometry) {
         this.geometry = lightFrontGeometry;
 
-        this.texture = new THREE.WebGLRenderTarget(1024, 1024, {
+        this._texture = new THREE.WebGLRenderTarget(200, 200, {
             type: THREE.FloatType,
         });
 
@@ -25,14 +25,22 @@ export class Caustics {
 
         this.causticMesh = new THREE.Mesh(this.geometry, material);
     }
+    get texture(): THREE.Texture {
+        return this._texture.texture;
+    }
 
     update(waterTexture: THREE.Texture): void {
-        // console.log(waterTexture);
         this.causticMesh.material.uniforms['water'].value = waterTexture;
 
-        RENDERER.setRenderTarget(this.texture);
-        RENDERER.setClearColor(new THREE.Color('black'), 0);
+        // Bind the current texture
+        RENDERER.setRenderTarget(this._texture);
+        // commented because I don't get what's going on
+        RENDERER.setClearColor(new THREE.Color('black'), 1);
+        // clear the current frame buffer
         RENDERER.clear();
+        //actually make computarions on the mesh, so this calls the shaders (?)
         RENDERER.render(this.causticMesh, CAMERA);
+        // unbind the texture
+        RENDERER.setRenderTarget(null);
     }
 }

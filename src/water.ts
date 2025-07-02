@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import waterVert from '../shaders/water/vertex.glsl';
 import waterFrag from '../shaders/water/fragment.glsl';
-import { CAMERA, CUBE_TEXTURE, LIGHT, RENDERER, TILES } from './constants';
+import { CAMERA, CUBE_TEXTURE, LIGHT, TILES } from './constants';
 export class Water {
     public geometry;
     public material;
@@ -20,22 +20,17 @@ export class Water {
             },
             vertexShader: waterVert,
             fragmentShader: waterFrag,
+            wireframe: true,
         });
 
         this.mesh = new THREE.Mesh(this.geometry, this.material);
     }
-
-    draw(waterTexture: THREE.Texture, causticsTexture: THREE.Texture): void {
+    updateUniforms(waterTexture: THREE.Texture, causticsTexture: THREE.Texture): void {
+        const eyePosition = CAMERA.position;
+        const isUnderwater = eyePosition.y < 0;
         this.material.uniforms['water'].value = waterTexture;
         this.material.uniforms['causticTex'].value = causticsTexture;
-
-        this.material.side = THREE.FrontSide;
-        this.material.uniforms['underwater'].value = true;
-
-        RENDERER.render(this.mesh, CAMERA);
-
-        this.material.side = THREE.BackSide;
-        this.material.uniforms['underwater'].value = false;
-        RENDERER.render(this.mesh, CAMERA);
+        this.material.side = isUnderwater ? THREE.BackSide : THREE.FrontSide;
+        this.material.uniforms['underwater'].value = isUnderwater;
     }
 }

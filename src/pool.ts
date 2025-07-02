@@ -1,12 +1,12 @@
 import * as THREE from 'three';
 import poolVert from '../shaders/pool/vertex.glsl';
 import poolFrag from '../shaders/pool/fragment.glsl';
-import { CAMERA, LIGHT, RENDERER, TILES } from './constants';
+import { LIGHT, TILES } from './constants';
 
 export class Pool {
     private geometry;
     private material;
-    private mesh;
+    public mesh;
     constructor() {
         this.geometry = new THREE.BufferGeometry();
         const vertices = new Float32Array([
@@ -32,11 +32,8 @@ export class Pool {
 
         this.mesh = new THREE.Mesh(this.geometry, this.material);
     }
-
-    draw(waterTexture: THREE.Texture, causticsTexture: THREE.Texture): void {
+    updateUniforms(waterTexture: THREE.Texture, causticsTexture: THREE.Texture): void {
         this.material.uniforms['water'].value = waterTexture;
         this.material.uniforms['causticTex'].value = causticsTexture;
-
-        RENDERER.render(this.mesh, CAMERA);
     }
 }
