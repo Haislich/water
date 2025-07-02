@@ -1,13 +1,20 @@
 import * as THREE from 'three';
-import { CANVAS, FLOOR_ARM, FLOOR_COLOR, FLOOR_DISPLACEMENT, FLOOR_NORMAL } from './constants';
+import { FLOOR_ARM, FLOOR_COLOR, FLOOR_DISPLACEMENT, FLOOR_NORMAL } from './constants';
 
+/**
+ * Generates a custom alpha map with:
+ * - a black square in the center (fully transparent)
+ * - a circular Gaussian falloff around the square (fade back to opaque)
+ * - fully opaque corners
+ */
 const generateGaussianSquareHoleAlphaMap = (
     size: number = 512,
     squareRatio: number = 0.3,
     sigma: number = 0.15 // smaller = sharper falloff
 ): THREE.CanvasTexture => {
-    CANVAS.width = CANVAS.height = size;
-    const ctx = CANVAS.getContext('2d')!;
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = size;
+    const ctx = canvas.getContext('2d')!;
     const imageData = ctx.createImageData(size, size);
     const data = imageData.data;
 
@@ -51,56 +58,19 @@ const generateGaussianSquareHoleAlphaMap = (
 
     ctx.putImageData(imageData, 0, 0);
 
-    const texture = new THREE.CanvasTexture(CANVAS);
+    const texture = new THREE.CanvasTexture(canvas);
     texture.minFilter = THREE.LinearFilter;
     texture.magFilter = THREE.LinearFilter;
     texture.wrapS = THREE.ClampToEdgeWrapping;
     texture.wrapT = THREE.ClampToEdgeWrapping;
     return texture;
 };
-// const centerUVs = (geometry: THREE.BufferGeometry, outerSize: number): void => {
-//     const uvs = geometry.attributes.uv;
-//     for (let i = 0; i < uvs.count; i++) {
-//         // Original UVs go from 0 to 1 over the bounding box.
-//         // We want UVs that treat (outerSize/2, outerSize/2) as center.
-//         const x = geometry.attributes.position.getX(i);
-//         const y = geometry.attributes.position.getY(i); // on XY plane
 
-//         const newU = x / outerSize;
-//         const newV = y / outerSize;
-
-//         uvs.setXY(i, newU, newV);
-//     }
-//     uvs.needsUpdate = true;
-// };
 const POOL_SIZE = 2;
 
 export class Floor {
     public mesh;
     constructor(outerSize: number = 10) {
-        // const outerShape = new THREE.Shape();
-
-        // outerShape.moveTo(0, 0);
-        // outerShape.lineTo(outerSize, 0);
-        // outerShape.lineTo(outerSize, outerSize);
-        // outerShape.lineTo(0, outerSize);
-        // outerShape.lineTo(0, 0);
-
-        // // Inner square hole
-
-        // const holeOffset = (outerSize - POOL_SIZE) / 2; // center the hole
-        // const hole = new THREE.Path();
-        // hole.moveTo(holeOffset, holeOffset);
-        // hole.lineTo(holeOffset + POOL_SIZE, holeOffset);
-        // hole.lineTo(holeOffset + POOL_SIZE, holeOffset + POOL_SIZE);
-        // hole.lineTo(holeOffset, holeOffset + POOL_SIZE);
-        // hole.lineTo(holeOffset, holeOffset);
-
-        // // Add the hole to the shape
-        // outerShape.holes.push(hole);
-
-        // // Create geometry and mesh
-        // const geometry = new THREE.ShapeGeometry(outerShape, 128);
         const ALPHA_MAP = generateGaussianSquareHoleAlphaMap(
             512,
             POOL_SIZE / outerSize, // so square matches world scale
@@ -124,9 +94,7 @@ export class Floor {
         });
         this.mesh = new THREE.Mesh(geometry, material);
         this.mesh.rotation.x = -Math.PI / 2;
-        // this.mesh.position.x -= outerSize / 2;
-        // this.mesh.position.z += outerSize / 2;
 
-        this.mesh.position.y += 0.01;
+        this.mesh.position.y += 0.18;
     }
 }

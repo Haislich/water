@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import waterVert from '../shaders/water/vertex.glsl';
 import waterFrag from '../shaders/water/fragment.glsl';
-import { CAMERA, CUBE_TEXTURE, LIGHT, TILES } from './constants';
+import { CAMERA, CUBE_TEXTURE, LIGHT, FLOOR_COLOR } from './constants';
 export class Water {
     public geometry;
     public material;
@@ -12,7 +12,7 @@ export class Water {
         this.material = new THREE.RawShaderMaterial({
             uniforms: {
                 light: { value: LIGHT },
-                tiles: { value: TILES },
+                tiles: { value: FLOOR_COLOR },
                 sky: { value: CUBE_TEXTURE },
                 water: { value: null },
                 causticTex: { value: null },

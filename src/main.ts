@@ -31,6 +31,9 @@ gui.domElement.prepend(description);
 (THREE.ShaderChunk as Record<string, string>)['utils'] = utils;
 
 const scene = new THREE.Scene();
+
+scene.fog = new THREE.Fog(new THREE.Color('#9e7f3c'), 1, 5);
+// scene.background = BACKGROUND;
 // Create mouse Controls
 const controls = new OrbitControls(CAMERA, CANVAS);
 controls.rotateSpeed = 2.5;
