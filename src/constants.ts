@@ -1,7 +1,15 @@
 import * as THREE from 'three';
 
+export const POOL_SIZE = 2;
+
 // Light direction
-export const LIGHT = new THREE.Vector3(0.7559289460184544, 0.7559289460184544, -0.3779644730092272);
+// export const LIGHT = new THREE.Vector3(0.7559289460184544, 0.7559289460184544, -0.3779644730092272);
+// Create the actual directional light
+export const DIRECTIONAL_LIGHT = new THREE.DirectionalLight(0xffffff, 1.0);
+DIRECTIONAL_LIGHT.position.set(1, 1, -0.5).normalize(); // or any other direction
+
+// Export its normalized direction separately (to use in shaders)
+export const LIGHT = DIRECTIONAL_LIGHT.position.clone().normalize();
 
 const textureLoader = new THREE.TextureLoader();
 export const TILES = textureLoader.load('textures/tiles.jpg');

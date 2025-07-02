@@ -1,15 +1,15 @@
 import GUI from 'lil-gui';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
-// import { EXRLoader } from 'three/addons/loaders/EXRLoader.js';
+// import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 import { Water } from './water';
 import { Caustics } from './caustics';
 import { WaterSimulation } from './waterSimulation';
 import { Pool } from './pool';
 import utils from '../shaders/utils.glsl';
-import { CAMERA, CANVAS, RENDERER } from './constants';
+import { CAMERA, CANVAS, DIRECTIONAL_LIGHT, RENDERER } from './constants';
+import { Floor } from './floor';
 const gui = new GUI({ width: 340 });
 
 const description = document.createElement('div');
@@ -52,13 +52,13 @@ for (let i = 0; i < position.count; i++) {
 position.needsUpdate = true;
 
 const targetmesh = new THREE.Mesh(targetgeometry);
-const wireframe = new THREE.WireframeGeometry(targetgeometry);
-const targetline: THREE.LineSegments<THREE.WireframeGeometry<THREE.PlaneGeometry>, THREE.Material, THREE.Object3DEventMap> = new THREE.LineSegments(wireframe);
-targetline.material.depthTest = false;
-targetline.material.opacity = 0.5;
-targetline.material.transparent = true;
-scene.add(targetline);
-
+// const wireframe = new THREE.WireframeGeometry(targetgeometry);
+// const targetline: THREE.LineSegments<THREE.WireframeGeometry<THREE.PlaneGeometry>, THREE.Material, THREE.Object3DEventMap> = new THREE.LineSegments(wireframe);
+// targetline.material.depthTest = false;
+// targetline.material.opacity = 0.5;
+// targetline.material.transparent = true;
+// scene.add(targetline);
+scene.add(DIRECTIONAL_LIGHT);
 const cameraHelper = new THREE.CameraHelper(CAMERA);
 scene.add(cameraHelper);
 
@@ -66,8 +66,13 @@ const waterSimulation = new WaterSimulation();
 const water = new Water();
 const caustics = new Caustics(water.geometry);
 const pool = new Pool();
+const floor = new Floor();
 scene.add(water.mesh);
 scene.add(pool.mesh);
+
+scene.add(floor.mesh);
+
+// Add to your scene
 
 // Main rendering loop
 const animate = (): void => {
@@ -79,7 +84,7 @@ const animate = (): void => {
 
     RENDERER.render(scene, CAMERA);
     controls.update();
-
+    // waterSimulation.addDrop(0, 0, 0.05, 0.04);
     window.requestAnimationFrame(animate);
 };
 const rect = CANVAS.getBoundingClientRect();

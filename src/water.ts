@@ -20,7 +20,6 @@ export class Water {
             },
             vertexShader: waterVert,
             fragmentShader: waterFrag,
-            // wireframe: true,
         });
 
         this.mesh = new THREE.Mesh(this.geometry, this.material);
