@@ -1,7 +1,7 @@
 const float IOR_AIR = 1.0;
 const float IOR_WATER = 1.333;
 
-const float poolHeight = 2.0;
+const float poolHeight = 1.0;
 const vec3 abovewaterColor = vec3(0.25, 1.0, 1.25);
 const vec3 underwaterColor = vec3(0.4, 0.9, 1.0);
 uniform vec3 light;

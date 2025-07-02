@@ -1,7 +1,5 @@
 import * as THREE from 'three';
 
-export const POOL_SIZE = 2;
-
 // Light direction
 // export const LIGHT = new THREE.Vector3(0.7559289460184544, 0.7559289460184544, -0.3779644730092272);
 // Create the actual directional light
@@ -13,6 +11,28 @@ export const LIGHT = DIRECTIONAL_LIGHT.position.clone().normalize();
 
 const textureLoader = new THREE.TextureLoader();
 export const TILES = textureLoader.load('textures/tiles.jpg');
+export const ALPHA_MAP = textureLoader.load('floor/alpha.webp');
+export const FLOOR_COLOR = textureLoader.load('floor/coast_sand_rocks_02_1k/coast_sand_rocks_02_diff_1k.webp');
+export const FLOOR_ARM = textureLoader.load('floor/coast_sand_rocks_02_1k/coast_sand_rocks_02_arm_1k.webp');
+export const FLOOR_NORMAL = textureLoader.load('floor/coast_sand_rocks_02_1k/coast_sand_rocks_02_nor_gl_1k.webp');
+export const FLOOR_DISPLACEMENT = textureLoader.load('floor/coast_sand_rocks_02_1k/coast_sand_rocks_02_disp_1k.webp');
+
+FLOOR_COLOR.colorSpace = THREE.SRGBColorSpace;
+
+FLOOR_COLOR.repeat.set(8, 8);
+FLOOR_ARM.repeat.set(8, 8);
+FLOOR_NORMAL.repeat.set(8, 8);
+FLOOR_DISPLACEMENT.repeat.set(8, 8);
+
+FLOOR_COLOR.wrapS = THREE.RepeatWrapping;
+FLOOR_ARM.wrapS = THREE.RepeatWrapping;
+FLOOR_NORMAL.wrapS = THREE.RepeatWrapping;
+FLOOR_DISPLACEMENT.wrapS = THREE.RepeatWrapping;
+
+FLOOR_COLOR.wrapT = THREE.RepeatWrapping;
+FLOOR_ARM.wrapT = THREE.RepeatWrapping;
+FLOOR_NORMAL.wrapT = THREE.RepeatWrapping;
+FLOOR_DISPLACEMENT.wrapT = THREE.RepeatWrapping;
 
 const cubetextureloader = new THREE.CubeTextureLoader();
 
