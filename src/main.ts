@@ -69,28 +69,6 @@ const pool = new Pool();
 scene.add(water.mesh);
 scene.add(pool.mesh);
 
-const objLoader = new OBJLoader();
-let sharkMesh: THREE.Mesh;
-
-objLoader.load('WhiteShark.obj', (object) => {
-    // Extract first child geometry
-    const geometry = (object.children[0] as THREE.Mesh).geometry;
-    geometry.computeVertexNormals();
-
-    // Apply transformations
-    geometry.scale(0.12, 0.12, 0.12);
-    // geometry.rotateX(Math.PI / 2);
-    // geometry.rotateZ(-Math.PI / 2);
-    geometry.translate(0, -0.5, 0.4); // place under the water
-
-    // Create mesh with a basic material
-    const material = new THREE.MeshStandardMaterial({ color: 0xaaaaaa });
-    sharkMesh = new THREE.Mesh(geometry, material);
-
-    // Add to scene
-    scene.add(sharkMesh);
-});
-
 // Main rendering loop
 const animate = (): void => {
     waterSimulation.stepSimulation();

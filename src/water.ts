@@ -20,7 +20,7 @@ export class Water {
             },
             vertexShader: waterVert,
             fragmentShader: waterFrag,
-            wireframe: true,
+            // wireframe: true,
         });
 
         this.mesh = new THREE.Mesh(this.geometry, this.material);
@@ -30,7 +30,7 @@ export class Water {
         const isUnderwater = eyePosition.y < 0;
         this.material.uniforms['water'].value = waterTexture;
         this.material.uniforms['causticTex'].value = causticsTexture;
-        this.material.side = isUnderwater ? THREE.BackSide : THREE.FrontSide;
+        this.material.side = isUnderwater ? THREE.FrontSide : THREE.BackSide;
         this.material.uniforms['underwater'].value = isUnderwater;
     }
 }
