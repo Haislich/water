@@ -17,6 +17,10 @@ export const ALPHA_MAP = textureLoader.load('floor/alpha.webp');
 // export const FLOOR_ARM = textureLoader.load('floor/coast_sand_rocks_02_1k/coast_sand_rocks_02_arm_1k.webp');
 // export const FLOOR_NORMAL = textureLoader.load('floor/coast_sand_rocks_02_1k/coast_sand_rocks_02_nor_gl_1k.webp');
 // export const FLOOR_DISPLACEMENT = textureLoader.load('floor/coast_sand_rocks_02_1k/coast_sand_rocks_02_disp_1k.webp');
+export const NOISE_TEXTURE = textureLoader.load('textures/noiseTexture.png');
+
+NOISE_TEXTURE.wrapS = THREE.RepeatWrapping;
+NOISE_TEXTURE.wrapT = THREE.RepeatWrapping;
 
 export const FLOOR_COLOR = textureLoader.load('floor/sand_01_1k/textures/sand_01_diff_1k.jpg');
 

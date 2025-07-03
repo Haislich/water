@@ -94,11 +94,13 @@ scene.add(smoke.mesh);
 const clock = new THREE.Clock();
 
 const animate = (): void => {
+    const elapsedTime = clock.getElapsedTime();
     waterSimulation.stepSimulation();
     waterSimulation.updateNormals();
     caustics.update(waterSimulation.texture);
     water.updateUniforms(waterSimulation.texture, caustics.texture);
     pool.updateUniforms(waterSimulation.texture, caustics.texture);
+    smoke.mesh.material.uniforms['uTime'].value = elapsedTime;
 
     RENDERER.render(scene, CAMERA);
     controls.update();

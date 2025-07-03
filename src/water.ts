@@ -26,6 +26,7 @@ export class Water {
                 side: THREE.BackSide,
                 vertexShader: waterVert,
                 fragmentShader: waterFrag,
+                // transparent: true,
             })
         );
         this.underWaterMesh = new THREE.Mesh(
@@ -42,6 +43,7 @@ export class Water {
                 side: THREE.FrontSide,
                 vertexShader: waterVert,
                 fragmentShader: waterFrag,
+                // transparent: true,
             })
         );
     }
