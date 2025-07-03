@@ -73,7 +73,6 @@ const pool = new Pool();
 const floor = new Floor();
 scene.add(water.aboveWaterMesh);
 scene.add(water.underWaterMesh);
-
 scene.add(pool.mesh);
 // scene.add(floor.mesh);
 
@@ -87,8 +86,14 @@ scene.add(pool.mesh);
 //     scene.add(duck);
 // });
 
-const smoke = new Smoke();
-scene.add(smoke.mesh);
+const smoke1 = new Smoke();
+smoke1.mesh.position.z += 0.5;
+scene.add(smoke1.mesh);
+const smoke2 = new Smoke();
+scene.add(smoke2.mesh);
+smoke2.mesh.position.x += 1;
+
+smoke2.mesh.position.z -= 0.5;
 
 // Main rendering loop
 const clock = new THREE.Clock();
@@ -100,7 +105,8 @@ const animate = (): void => {
     caustics.update(waterSimulation.texture);
     water.updateUniforms(waterSimulation.texture, caustics.texture);
     pool.updateUniforms(waterSimulation.texture, caustics.texture);
-    smoke.mesh.material.uniforms['uTime'].value = elapsedTime;
+    smoke1.mesh.material.uniforms['uTime'].value = elapsedTime;
+    smoke2.mesh.material.uniforms['uTime'].value = elapsedTime;
 
     RENDERER.render(scene, CAMERA);
     controls.update();
