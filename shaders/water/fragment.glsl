@@ -13,7 +13,7 @@ vec3 getSurfaceRayColor(vec3 origin, vec3 ray, vec3 waterColor) {
   vec3 color;
 
   if(ray.y < 0.0) {
-    vec2 t = intersectCube(origin, ray, vec3(-1.0, -poolHeight, -1.0), vec3(1.0, 2.0, 1.0));
+    vec2 t = intersectCube(origin, ray, vec3(-1.0, -poolHeight, -1.0), vec3(1.0, 1.0, 1.0));
     color = getWallColor(origin + ray * t.y);
   } else {
     vec2 t = intersectCube(origin, ray, vec3(-1.0, -poolHeight, -1.0), vec3(1.0, 2.0, 1.0));
@@ -27,8 +27,8 @@ vec3 getSurfaceRayColor(vec3 origin, vec3 ray, vec3 waterColor) {
   }
 
   if(ray.y < 0.0)
-    color *= waterColor;
-
+    color =  mix(color, waterColor, 0.3);
+  
   return color;
 }
 
@@ -54,7 +54,7 @@ void main() {
     vec3 reflectedColor = getSurfaceRayColor(pos, reflectedRay, underwaterColor);
     vec3 refractedColor = getSurfaceRayColor(pos, refractedRay, vec3(1.0)) * vec3(0.8, 1.0, 1.1);
 
-    gl_FragColor = vec4(mix(reflectedColor, refractedColor, (1.0 - fresnel) * length(refractedRay)) * 10., 1.0);
+    gl_FragColor = vec4(mix(reflectedColor, refractedColor, (1.0 - fresnel) * length(refractedRay)) , 1.0);
   } else {
     vec3 reflectedRay = reflect(incomingRay, normal);
     vec3 refractedRay = refract(incomingRay, normal, IOR_AIR / IOR_WATER);
@@ -63,6 +63,6 @@ void main() {
     vec3 reflectedColor = getSurfaceRayColor(pos, reflectedRay, abovewaterColor);
     vec3 refractedColor = getSurfaceRayColor(pos, refractedRay, abovewaterColor);
 
-    gl_FragColor = vec4(mix(refractedColor, reflectedColor, fresnel)*1.8, 1.0);
+    gl_FragColor = vec4(mix(refractedColor, reflectedColor, fresnel), 1.0);
   }
 }

@@ -1,7 +1,7 @@
 import GUI from 'lil-gui';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-// import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 import { Water } from './water';
 import { Caustics } from './caustics';
@@ -10,6 +10,7 @@ import { Pool } from './pool';
 import utils from '../shaders/utils.glsl';
 import { CAMERA, CANVAS, DIRECTIONAL_LIGHT, RENDERER } from './constants';
 import { Floor } from './floor';
+import { Smoke } from './smoke';
 const gui = new GUI({ width: 340 });
 
 const description = document.createElement('div');
@@ -70,14 +71,28 @@ const water = new Water();
 const caustics = new Caustics(water.geometry);
 const pool = new Pool();
 const floor = new Floor();
-scene.add(water.mesh);
+scene.add(water.aboveWaterMesh);
+scene.add(water.underWaterMesh);
+
 scene.add(pool.mesh);
+// scene.add(floor.mesh);
 
-scene.add(floor.mesh);
+// const gltfLoader = new GLTFLoader();
+// let duck: THREE.Mesh;
+// gltfLoader.load('/models/Duck/glTF/Duck.gltf', (gltf) => {
+//     duck = gltf.scene.children[0];
+//     duck.scale.setScalar(0.0025);
+//     duck.castShadow = true;
+//     duck.position.y -= 0.1;
+//     scene.add(duck);
+// });
 
-// Add to your scene
+const smoke = new Smoke();
+scene.add(smoke.mesh);
 
 // Main rendering loop
+const clock = new THREE.Clock();
+
 const animate = (): void => {
     waterSimulation.stepSimulation();
     waterSimulation.updateNormals();

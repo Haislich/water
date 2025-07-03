@@ -43,8 +43,8 @@ FLOOR_DISPLACEMENT.wrapT = THREE.RepeatWrapping;
 
 const cubetextureloader = new THREE.CubeTextureLoader();
 
-// export const CUBE_TEXTURE = cubetextureloader.load(['textures/xpos.jpg', 'textures/xneg.jpg', 'textures/ypos.jpg', 'textures/ypos.jpg', 'textures/zpos.jpg', 'textures/zneg.jpg']);
-export const CUBE_TEXTURE = cubetextureloader.load(['textures/posx.jpg', 'textures/negx.jpg', 'textures/posy.jpg', 'textures/posy.jpg', 'textures/posz.jpg', 'textures/negz.jpg']);
+export const CUBE_TEXTURE = cubetextureloader.load(['textures/xpos.jpg', 'textures/xneg.jpg', 'textures/ypos.jpg', 'textures/ypos.jpg', 'textures/zpos.jpg', 'textures/zneg.jpg']);
+// export const CUBE_TEXTURE = cubetextureloader.load(['textures/posx.jpg', 'textures/negx.jpg', 'textures/posy.jpg', 'textures/posy.jpg', 'textures/posz.jpg', 'textures/negz.jpg']);
 
 // export const BACKGROUND = CUBE_TEXTURE.clone();
 // BACKGROUND.flipY = true;

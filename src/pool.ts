@@ -1,44 +1,8 @@
 import * as THREE from 'three';
 import poolVert from '../shaders/pool/vertex.glsl';
 import poolFrag from '../shaders/pool/fragment.glsl';
-import { LIGHT, FLOOR_COLOR } from './constants';
+import { LIGHT, FLOOR_COLOR, TILES } from './constants';
 
-function generateBowlGeometry(radius = 1, segments = 32, heightScale = 1): THREE.BufferGeometry {
-    const vertices = [];
-    const indices = [];
-
-    for (let y = 0; y <= segments; y++) {
-        const v = y / segments;
-        const r = v * radius;
-        const z = -heightScale * (r * r); // Paraboloid
-
-        for (let x = 0; x <= segments; x++) {
-            const u = x / segments;
-            const angle = u * Math.PI * 2;
-            const px = r * Math.cos(angle);
-            const py = r * Math.sin(angle);
-            vertices.push(px, py, z);
-        }
-    }
-
-    for (let y = 0; y < segments; y++) {
-        for (let x = 0; x < segments; x++) {
-            const a = y * (segments + 1) + x;
-            const b = a + 1;
-            const c = a + (segments + 1);
-            const d = c + 1;
-
-            indices.push(a, c, b);
-            indices.push(b, c, d);
-        }
-    }
-
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
-    geometry.setIndex(indices);
-    geometry.computeVertexNormals(); // needed for lighting
-    return geometry;
-}
 export class Pool {
     private geometry;
     private material;
