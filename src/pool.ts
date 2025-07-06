@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import poolVert from '../shaders/pool/vertex.glsl';
 import poolFrag from '../shaders/pool/fragment.glsl';
-import { LIGHT, FLOOR_COLOR } from './constants';
+import { LIGHT, TILES } from './constants';
 
 export class Pool {
     private geometry;
@@ -21,7 +21,7 @@ export class Pool {
         this.material = new THREE.RawShaderMaterial({
             uniforms: {
                 light: { value: LIGHT },
-                tiles: { value: FLOOR_COLOR },
+                tiles: { value: TILES },
                 water: { value: null },
                 causticTex: { value: null },
             },

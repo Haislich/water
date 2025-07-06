@@ -1,17 +1,17 @@
+// water-vertex.glsl  (only the body shown)
 uniform sampler2D water;
 
-varying vec3 vEye;
-varying vec3 pos;
+varying vec3 pos;           // world-space surface point
 
 void main() {
-  // Mapping from clip coordinates to uv coordinates for accessing the
-  // water texture
-  vec2 uvPosition = position.xy * 0.5 + 0.5;
-  vec4 info = texture2D(water, uvPosition);
-  // Reorder the vertex position, so that the fla lies on the XZ plane
-  pos = position.xzy;
-  // Add the height diplacement stored in the texture
-  pos.y += info.r;
+  vec2 uv = position.xy * 0.5 + 0.5;
+  float height = texture2D(water, uv).r;
 
-  gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+  vec3 localPos = position.xzy;
+  localPos.y += height;
+
+  vec4 worldPos = modelMatrix * vec4(localPos, 1.0);
+  pos = worldPos.xyz;
+
+  gl_Position = projectionMatrix * viewMatrix * worldPos;
 }

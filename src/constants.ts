@@ -75,3 +75,6 @@ window.addEventListener('resize', () => {
     RENDERER.setSize(window.innerWidth, window.innerHeight);
     RENDERER.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 });
+
+export const SPHERE_RADIUS = 0.2;
+export const SPHERE_CENTER = new THREE.Vector3(0, -0.5, 0);

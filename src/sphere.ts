@@ -1,11 +1,11 @@
 import * as THREE from 'three';
 import sphereVert from '../shaders/sphere/vertex.glsl';
 import shpereFrag from '../shaders/sphere/fragment.glsl';
-import { LIGHT } from './constants';
+import { LIGHT, SPHERE_CENTER, SPHERE_RADIUS } from './constants';
 export class Sphere {
     public geometry;
     public mesh;
-    constructor(radius: number = 0.5) {
+    constructor(radius: number = 1) {
         this.geometry = new THREE.SphereGeometry(radius);
         this.mesh = new THREE.Mesh(
             this.geometry,
@@ -14,13 +14,15 @@ export class Sphere {
                 fragmentShader: shpereFrag,
                 uniforms: {
                     light: new THREE.Uniform(LIGHT),
-                    sphereCenter: new THREE.Uniform(new THREE.Vector3(0, 0, 0)),
-                    sphereRadius: new THREE.Uniform(radius),
+                    sphereCenter: new THREE.Uniform(SPHERE_CENTER),
+                    sphereRadius: new THREE.Uniform(SPHERE_RADIUS),
                     caustics: new THREE.Uniform(null),
                     water: new THREE.Uniform(null),
                 },
             })
+            // new THREE.MeshBasicMaterial()
         );
+
         // this.mesh.visible = false;
     }
 }

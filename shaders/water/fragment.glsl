@@ -6,14 +6,12 @@ precision highp int;
 uniform float underwater;
 uniform samplerCube sky;
 
-// varying vec3 eye;
-
 uniform vec3 eye;
 
 varying vec3 pos;
 
-const vec3 sphereCenter = vec3(0.0);
-const float sphereRadius = .5;
+uniform vec3 sphereCenter;
+uniform float sphereRadius;
 
 vec3 getSphereColor(vec3 point) {
   vec3 color = vec3(0.5);        /* ambient occlusion with walls */    

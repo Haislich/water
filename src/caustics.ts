@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import causticVert from '../shaders/caustics/vertex.glsl';
 import causticFrag from '../shaders/caustics/fragment.glsl';
-import { CAMERA, LIGHT, RENDERER } from './constants';
+import { CAMERA, LIGHT, RENDERER, SPHERE_CENTER, SPHERE_RADIUS } from './constants';
 
 export class Caustics {
     private geometry;
@@ -18,6 +18,8 @@ export class Caustics {
             uniforms: {
                 light: { value: LIGHT },
                 water: { value: null },
+                sphereCenter: new THREE.Uniform(SPHERE_CENTER),
+                sphereRadius: new THREE.Uniform(SPHERE_RADIUS),
             },
             vertexShader: causticVert,
             fragmentShader: causticFrag,

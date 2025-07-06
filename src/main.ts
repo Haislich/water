@@ -72,8 +72,9 @@ const water = new Water();
 const caustics = new Caustics(water.geometry);
 const pool = new Pool();
 const floor = new Floor();
-scene.add(water.aboveWaterMesh);
-scene.add(water.underWaterMesh);
+// scene.add(water.aboveWaterMesh);
+// scene.add(water.underWaterMesh);
+scene.add(water.mesh);
 scene.add(pool.mesh);
 // scene.add(floor.mesh);
 
@@ -110,8 +111,8 @@ const animate = (): void => {
     pool.updateUniforms(waterSimulation.texture, caustics.texture);
     // smoke1.mesh.material.uniforms['uTime'].value = elapsedTime;
     // smoke2.mesh.material.uniforms['uTime'].value = elapsedTime;
-    sphere.mesh.material.uniforms.caustics.value = caustics.texture;
-    sphere.mesh.material.uniforms.water.value = waterSimulation.texture;
+    // sphere.mesh.material.uniforms.caustics.value = caustics.texture;
+    // sphere.mesh.material.uniforms.water.value = waterSimulation.texture;
     RENDERER.render(scene, CAMERA);
     controls.update();
     // waterSimulation.addDrop(0, 0, 0.05, 0.04);

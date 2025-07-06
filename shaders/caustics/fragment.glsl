@@ -4,10 +4,8 @@ precision highp int;
 #include <utils> // includes intersectCube, IOR_AIR, IOR_WATER, poolHeight
 
 // uniform vec3 light;
-// uniform vec3 sphereCenter;
-const vec3 sphereCenter = vec3(0.0);
-//uniform float sphereRadius;
-const float sphereRadius = .5;
+uniform vec3 sphereCenter;
+uniform float sphereRadius;
 
 varying vec3 oldPos;
 varying vec3 newPos;
