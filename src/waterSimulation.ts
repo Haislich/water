@@ -5,6 +5,7 @@ import dropFrag from '../shaders/simulation/drop_fragment.glsl';
 import updateFrag from '../shaders/simulation/update_fragment.glsl';
 import normalFrag from '../shaders/simulation/normal_fragment.glsl';
 import displaceFrag from '../shaders/simulation/displace_fragment.glsl';
+// import sphereFrag from '../shaders/simulation/sphere_fragment.glsl'
 
 import { CAMERA, RENDERER } from './constants';
 
@@ -17,6 +18,7 @@ export class WaterSimulation {
     public normalMesh;
     public updateMesh;
     public displaceMesh;
+    // public sphereMesh;
     constructor() {
         this.geometry = new THREE.PlaneGeometry(2, 2);
         this.textureA = new THREE.WebGLRenderTarget(256, 256, {

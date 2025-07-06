@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import poolVert from '../shaders/pool/vertex.glsl';
 import poolFrag from '../shaders/pool/fragment.glsl';
-import { LIGHT, FLOOR_COLOR, TILES } from './constants';
+import { LIGHT, FLOOR_COLOR } from './constants';
 
 export class Pool {
     private geometry;

@@ -11,6 +11,7 @@ import utils from '../shaders/utils.glsl';
 import { CAMERA, CANVAS, DIRECTIONAL_LIGHT, RENDERER } from './constants';
 import { Floor } from './floor';
 import { Smoke } from './smoke';
+import { Sphere } from './sphere';
 const gui = new GUI({ width: 340 });
 
 const description = document.createElement('div');
@@ -86,15 +87,17 @@ scene.add(pool.mesh);
 //     scene.add(duck);
 // });
 
-const smoke1 = new Smoke();
-smoke1.mesh.position.z += 0.5;
-scene.add(smoke1.mesh);
-const smoke2 = new Smoke();
-scene.add(smoke2.mesh);
-smoke2.mesh.position.x += 1;
+// const smoke1 = new Smoke();
+// smoke1.mesh.position.z += 0.5;
+// scene.add(smoke1.mesh);
+// const smoke2 = new Smoke();
+// scene.add(smoke2.mesh);
+// smoke2.mesh.position.x += 1;
 
-smoke2.mesh.position.z -= 0.5;
+// smoke2.mesh.position.z -= 0.5;
 
+const sphere = new Sphere();
+scene.add(sphere.mesh);
 // Main rendering loop
 const clock = new THREE.Clock();
 
@@ -105,9 +108,10 @@ const animate = (): void => {
     caustics.update(waterSimulation.texture);
     water.updateUniforms(waterSimulation.texture, caustics.texture);
     pool.updateUniforms(waterSimulation.texture, caustics.texture);
-    smoke1.mesh.material.uniforms['uTime'].value = elapsedTime;
-    smoke2.mesh.material.uniforms['uTime'].value = elapsedTime;
-
+    // smoke1.mesh.material.uniforms['uTime'].value = elapsedTime;
+    // smoke2.mesh.material.uniforms['uTime'].value = elapsedTime;
+    sphere.mesh.material.uniforms.caustics.value = caustics.texture;
+    sphere.mesh.material.uniforms.water.value = waterSimulation.texture;
     RENDERER.render(scene, CAMERA);
     controls.update();
     // waterSimulation.addDrop(0, 0, 0.05, 0.04);
