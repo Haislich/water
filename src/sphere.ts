@@ -6,8 +6,8 @@ export class Sphere {
     public geometry;
     public mesh;
     public radius;
-    public oldCenter = SPHERE_CENTER;
-    public newCenter = SPHERE_CENTER;
+    public oldCenter = SPHERE_CENTER.clone();
+    public newCenter = SPHERE_CENTER.clone();
 
     constructor(radius: number = 1) {
         this.radius = SPHERE_RADIUS;
@@ -30,13 +30,26 @@ export class Sphere {
 
         // this.mesh.visible = false;
     }
-    move(dx: number, dy: number, dz: number): void {
+    // move(dx: number, dy: number, dz: number): void {
+    //     const limit = 1 - this.radius;
+    //     const x = Math.max(-limit, Math.min(limit, this.mesh.position.x + dx));
+    //     const y = Math.max(-limit, Math.min(limit, this.mesh.position.y + dy));
+    //     const z = Math.max(-limit, Math.min(limit, this.mesh.position.z + dz));
+    //     this.oldCenter = this.newCenter;
+    //     this.newCenter = new THREE.Vector3(x, y, z);
+    //     this.mesh.material.uniforms.sphereCenter.value.set(x, y, z);
+    // }
+    move(dx: number, dy: number, dz: number): THREE.Vector3 {
         const limit = 1 - this.radius;
         const x = Math.max(-limit, Math.min(limit, this.mesh.position.x + dx));
         const y = Math.max(-limit, Math.min(limit, this.mesh.position.y + dy));
         const z = Math.max(-limit, Math.min(limit, this.mesh.position.z + dz));
-        this.oldCenter = this.newCenter;
-        this.newCenter = new THREE.Vector3(x, y, z);
-        this.mesh.material.uniforms.sphereCenter.value.set(x, y, z);
+
+        const newPos = new THREE.Vector3(x, y, z);
+        this.newCenter = newPos;
+        this.mesh.material.uniforms.sphereCenter.value.copy(newPos);
+        this.mesh.position.copy(newPos);
+
+        return newPos;
     }
 }

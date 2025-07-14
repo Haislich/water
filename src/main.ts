@@ -103,9 +103,8 @@ const animate = (): void => {
 
     waterSimulation.stepSimulation();
     waterSimulation.updateNormals();
-    // let sphere
-    sphere.move(Math.sin(elapsedTime), 0, Math.cos(elapsedTime));
-    waterSimulation.displaceVolume(sphere.oldCenter, sphere.newCenter, sphere.radius);
+    // sphere.move(Math.sin(elapsedTime), 0, Math.cos(elapsedTime));
+    // waterSimulation.displaceVolume(sphere.oldCenter, sphere.newCenter, sphere.radius);
     caustics.update(waterSimulation.texture);
     water.updateUniforms(waterSimulation.texture, caustics.texture);
     pool.updateUniforms(waterSimulation.texture, caustics.texture);
@@ -116,22 +115,71 @@ const animate = (): void => {
     controls.update();
     window.requestAnimationFrame(animate);
 };
+let isDragging = false;
+const dragPlane = new THREE.Plane();
+const dragOffset = new THREE.Vector3();
+const intersectionPoint = new THREE.Vector3();
 
-const rect = CANVAS.getBoundingClientRect();
 const onMouseMove = (event: MouseEvent): void => {
+    const rect = CANVAS.getBoundingClientRect();
     mouse.x = ((event.clientX - rect.left) * 2) / CANVAS.width - 1;
     mouse.y = (-(event.clientY - rect.top) * 2) / CANVAS.height + 1;
 
     raycaster.setFromCamera(mouse, CAMERA);
 
-    const intersects = raycaster.intersectObject(targetmesh);
+    if (isDragging) {
+        // Ray-plane intersection to find 3D drag point
+        raycaster.ray.intersectPlane(dragPlane, intersectionPoint);
 
-    for (const intersect of intersects) {
-        waterSimulation.addDrop(intersect.point.x, intersect.point.z, 0.03, 0.04);
+        if (intersectionPoint) {
+            const newCenter = intersectionPoint.clone().sub(dragOffset);
+            const currentPos = sphere.mesh.position.clone();
+            const delta = newCenter.sub(currentPos);
+            // sphere.move(delta.x, delta.y, delta.z);
+            // waterSimulation.displaceVolume(sphere.oldCenter, sphere.newCenter, sphere.radius);
+            const prev = sphere.newCenter.clone(); // capture before move
+            sphere.move(delta.x, delta.y, delta.z);
+            waterSimulation.displaceVolume(prev, sphere.newCenter, sphere.radius);
+            sphere.oldCenter = prev; // update after the displacement
+        }
+    } else {
+        // Regular water drop logic when not dragging
+        const intersects = raycaster.intersectObject(targetmesh);
+        for (const intersect of intersects) {
+            waterSimulation.addDrop(intersect.point.x, intersect.point.z, 0.03, 0.04);
+        }
     }
 };
+CANVAS.addEventListener('mousedown', (event) => {
+    const rect = CANVAS.getBoundingClientRect();
+    mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.y = (-(event.clientY - rect.top) / rect.height) * 2 + 1;
 
+    raycaster.setFromCamera(mouse, CAMERA);
+    const intersects = raycaster.intersectObject(sphere.mesh, true);
+
+    if (intersects.length > 0) {
+        controls.enabled = false;
+        isDragging = true;
+
+        dragPlane.setFromNormalAndCoplanarPoint(CAMERA.getWorldDirection(new THREE.Vector3()).negate(), intersects[0].point);
+        dragOffset.copy(intersects[0].point).sub(sphere.mesh.position);
+    } else {
+        controls.enabled = true; // let orbit controls do their thing
+        isDragging = false;
+    }
+});
+
+CANVAS.addEventListener('mouseup', () => {
+    isDragging = false;
+    controls.enabled = true;
+});
+
+// CANVAS.addEventListener('mousedown', onMouseDown);
 CANVAS.addEventListener('mousemove', onMouseMove);
+// CANVAS.addEventListener('mouseup', onMouseUp);
+
+// CANVAS.addEventListener('mousemove', onMouseMove);
 // for (let i = 0; i < 20; i++) {
 //     waterSimulation.addDrop(Math.random() * 2 - 1, Math.random() * 2 - 1, 0.03, i & 1 ? 0.02 : -0.02);
 // }
