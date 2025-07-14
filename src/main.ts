@@ -8,10 +8,11 @@ import { Caustics } from './caustics';
 import { WaterSimulation } from './waterSimulation';
 import { Pool } from './pool';
 import utils from '../shaders/utils.glsl';
-import { CAMERA, CANVAS, DIRECTIONAL_LIGHT, RENDERER } from './constants';
+import { CAMERA, CANVAS, CUBE_TEXTURE, DIRECTIONAL_LIGHT, RENDERER } from './constants';
 import { Floor } from './floor';
 import { Smoke } from './smoke';
 import { Sphere } from './sphere';
+import { Sky } from 'three/addons/objects/Sky.js';
 const gui = new GUI({ width: 340 });
 
 const description = document.createElement('div');
@@ -34,7 +35,7 @@ gui.domElement.prepend(description);
 
 const scene = new THREE.Scene();
 
-scene.fog = new THREE.Fog(new THREE.Color('#9e7f3c'), 1, 5);
+// scene.fog = new THREE.Fog(new THREE.Color('#9e7f3c'), 1, 5);
 // scene.background = BACKGROUND;
 // Create mouse Controls
 const controls = new OrbitControls(CAMERA, CANVAS);
@@ -61,16 +62,34 @@ scene.add(DIRECTIONAL_LIGHT);
 const cameraHelper = new THREE.CameraHelper(CAMERA);
 scene.add(cameraHelper);
 
+const sky = new Sky();
+sky.scale.setScalar(450000);
+
+// const phi = THREE.MathUtils.degToRad(90);
+// const theta = THREE.MathUtils.degToRad(180);
+// const sunPosition = new THREE.Vector3().setFromSphericalCoords(1, phi, theta);
+
+// Assume DIRECTIONAL_LIGHT is already added to the scene
+// and has a position you want the sun to match
+const lightDir = DIRECTIONAL_LIGHT.position.clone().normalize();
+
+// The Sky shader expects the sun position as a direction vector,
+// typically with a large magnitude
+const sunPosition = lightDir.clone().multiplyScalar(450000);
+sky.material.uniforms.sunPosition.value.copy(sunPosition);
+
+sky.material.uniforms.sunPosition.value = sunPosition;
+
+scene.add(sky);
+
 const waterSimulation = new WaterSimulation();
 const water = new Water();
 const caustics = new Caustics(water.geometry);
 const pool = new Pool();
 const floor = new Floor();
-// scene.add(water.aboveWaterMesh);
-// scene.add(water.underWaterMesh);
 scene.add(water.mesh);
 scene.add(pool.mesh);
-// scene.add(floor.mesh);
+scene.add(floor.mesh);
 
 // const gltfLoader = new GLTFLoader();
 // let duck: THREE.Mesh;

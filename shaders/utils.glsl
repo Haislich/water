@@ -3,7 +3,7 @@ const float IOR_WATER = 1.333;
 
 const float poolHeight = 1.0;
 const vec3 abovewaterColor = vec3(0.25, 1.0, 1.25);
-const vec3 underwaterColor = vec3(0.4, 0.9, 1.0);
+const vec3 underwaterColor = vec3(0.78, 0.88, 0.9);
 uniform vec3 light;
 uniform sampler2D tiles;
 uniform sampler2D causticTex;
@@ -20,7 +20,7 @@ vec2 intersectCube(vec3 origin, vec3 ray, vec3 cubeMin, vec3 cubeMax) {
 }
 
 vec3 getWallColor(vec3 point) {
-  float scale = 0.5;
+  float scale = .9;
 
   vec3 wallColor;
   vec3 normal;

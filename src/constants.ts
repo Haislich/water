@@ -3,7 +3,7 @@ import * as THREE from 'three';
 // Light direction
 // export const LIGHT = new THREE.Vector3(0.7559289460184544, 0.7559289460184544, -0.3779644730092272);
 // Create the actual directional light
-export const DIRECTIONAL_LIGHT = new THREE.DirectionalLight(0xffffff, 7.0);
+export const DIRECTIONAL_LIGHT = new THREE.DirectionalLight(0xffffff, 1.0);
 DIRECTIONAL_LIGHT.position.set(1, 1, -0.5).normalize(); // or any other direction
 
 // Export its normalized direction separately (to use in shaders)
@@ -22,11 +22,17 @@ export const NOISE_TEXTURE = textureLoader.load('textures/noiseTexture.png');
 NOISE_TEXTURE.wrapS = THREE.RepeatWrapping;
 NOISE_TEXTURE.wrapT = THREE.RepeatWrapping;
 
-export const FLOOR_COLOR = textureLoader.load('floor/sand_01_1k/textures/sand_01_diff_1k.jpg');
+// export const FLOOR_COLOR = textureLoader.load('floor/sand_01_1k/textures/sand_01_diff_1k.jpg');
 
-export const FLOOR_ARM = textureLoader.load('floor/sand_01_1k/textures/sand_01_arm_1k.jpg');
-export const FLOOR_NORMAL = textureLoader.load('floor/sand_01_1k/textures/sand_01_nor_gl_1k.jpg');
-export const FLOOR_DISPLACEMENT = textureLoader.load('floor/sand_01_1k/textures/sand_01_disp_1k.jpg');
+// export const FLOOR_ARM = textureLoader.load('floor/sand_01_1k/textures/sand_01_arm_1k.jpg');
+// export const FLOOR_NORMAL = textureLoader.load('floor/sand_01_1k/textures/sand_01_nor_gl_1k.jpg');
+// export const FLOOR_DISPLACEMENT = textureLoader.load('floor/sand_01_1k/textures/sand_01_disp_1k.jpg');
+
+export const FLOOR_COLOR = textureLoader.load('floor/rocky_trail_02_1k/textures/rocky_trail_02_diff_1k.jpg');
+
+export const FLOOR_ARM = textureLoader.load('floor/rocky_trail_02_1k/textures/rocky_trail_02_arm_1k.jpg');
+export const FLOOR_NORMAL = textureLoader.load('floor/rocky_trail_02_1k/textures/rocky_trail_02_nor_gl_1k.jpg');
+export const FLOOR_DISPLACEMENT = textureLoader.load('floor/rocky_trail_02_1k/textures/rocky_trail_02_disp_1k.jpg');
 
 FLOOR_COLOR.colorSpace = THREE.SRGBColorSpace;
 

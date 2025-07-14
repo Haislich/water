@@ -66,18 +66,18 @@ const generateGaussianSquareHoleAlphaMap = (
     return texture;
 };
 
-const POOL_SIZE = 2;
+const POOL_SIZE = 1.954;
 
 export class Floor {
     public mesh;
-    constructor(outerSize: number = 10) {
+    constructor(outerSize: number = 50) {
         const ALPHA_MAP = generateGaussianSquareHoleAlphaMap(
             512,
             POOL_SIZE / outerSize, // so square matches world scale
-            0.2 // control Gaussian spread
+            1 // control Gaussian spread
         );
         const geometry = new THREE.PlaneGeometry(outerSize, outerSize, outerSize * 10, outerSize * 10);
-        // centerUVs(geometry, outerSize);
+
         const material = new THREE.MeshStandardMaterial({
             alphaMap: ALPHA_MAP,
             transparent: true,
@@ -86,15 +86,18 @@ export class Floor {
             roughnessMap: FLOOR_ARM,
             metalnessMap: FLOOR_ARM,
             normalMap: FLOOR_NORMAL,
-            side: THREE.DoubleSide,
+            // side: THREE.DoubleSide,
             displacementMap: FLOOR_DISPLACEMENT,
             displacementScale: 0.3,
             displacementBias: -0.2,
+            alphaTest: 0.01,
+
             // wireframe: true,
         });
         this.mesh = new THREE.Mesh(geometry, material);
         this.mesh.rotation.x = -Math.PI / 2;
 
-        this.mesh.position.y += 0.18;
+        // this.mesh.position.x -= 0.05;
+        this.mesh.position.y += 0.19;
     }
 }
