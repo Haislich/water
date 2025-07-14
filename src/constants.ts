@@ -62,7 +62,8 @@ export const CAMERA = new THREE.PerspectiveCamera(75, CANVAS.width / CANVAS.heig
 CAMERA.position.set(0.426, 0.677, -2.095);
 CAMERA.rotation.set(2.828, 0.191, 3.108);
 
-export const RENDERER = new THREE.WebGLRenderer({ canvas: CANVAS, alpha: true });
+const context = CANVAS.getContext('webgl1')!;
+export const RENDERER = new THREE.WebGLRenderer({ canvas: CANVAS, alpha: true, context });
 RENDERER.setSize(window.innerWidth, window.innerHeight);
 RENDERER.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 

@@ -8,7 +8,6 @@ attribute vec3 position;
 
 #include <utils>
 
-
 /* project the ray onto the plane */
 vec3 project(vec3 origin, vec3 ray, vec3 refractedLight) {
   vec2 tcube = intersectCube(origin, ray, vec3(-1.0, -poolHeight, -1.0), vec3(1.0, 2.0, 1.0));
@@ -17,7 +16,6 @@ vec3 project(vec3 origin, vec3 ray, vec3 refractedLight) {
 
   return origin + refractedLight * tplane;
 }
-
 
 void main() {
   vec4 info = texture2D(water, position.xy * 0.5 + 0.5);
