@@ -93,11 +93,6 @@ scene.add(pool.mesh);
 
 const sphere = new Sphere();
 scene.add(sphere.mesh);
-const useSpherePhysics = true;
-const velocity = new THREE.Vector3(0, 0, 0);
-const gravity = new THREE.Vector3(0, -4, 0); // same as original
-const radius = 0.25;
-const oldCenter = sphere.mesh.position.clone();
 
 // Main rendering loop
 const clock = new THREE.Clock();
@@ -106,37 +101,11 @@ const animate = (): void => {
     const deltaTime = clock.getDelta(); // better for consistent time steps
     const elapsedTime = clock.getElapsedTime();
 
-    // Sphere physics
-    if (useSpherePhysics) {
-        const center = sphere.mesh.position;
-        const percentUnderWater = Math.max(0, Math.min(1, (radius - center.y) / (2 * radius)));
-
-        // Gravity with underwater damping
-        const drag = velocity
-            .clone()
-            .normalize()
-            .multiplyScalar(velocity.lengthSq() * percentUnderWater * deltaTime);
-        velocity.add(gravity.clone().multiplyScalar(deltaTime - 1.1 * deltaTime * percentUnderWater));
-        velocity.sub(drag);
-
-        // Apply velocity
-        center.addScaledVector(velocity, deltaTime);
-
-        // Bounce off the bottom
-        const floorY = -1 + radius;
-        if (center.y < floorY) {
-            center.y = floorY;
-            velocity.y = Math.abs(velocity.y) * 0.7;
-        }
-
-        // Displace water
-        waterSimulation.moveSphere?.(oldCenter.x, oldCenter.z, center.x, center.z, radius);
-        oldCenter.copy(center);
-    }
-
-    // Water + rendering logic
     waterSimulation.stepSimulation();
     waterSimulation.updateNormals();
+    // let sphere
+    sphere.move(Math.sin(elapsedTime), 0, Math.cos(elapsedTime));
+    waterSimulation.displaceVolume(sphere.oldCenter, sphere.newCenter, sphere.radius);
     caustics.update(waterSimulation.texture);
     water.updateUniforms(waterSimulation.texture, caustics.texture);
     pool.updateUniforms(waterSimulation.texture, caustics.texture);
@@ -163,8 +132,8 @@ const onMouseMove = (event: MouseEvent): void => {
 };
 
 CANVAS.addEventListener('mousemove', onMouseMove);
-for (let i = 0; i < 20; i++) {
-    waterSimulation.addDrop(Math.random() * 2 - 1, Math.random() * 2 - 1, 0.03, i & 1 ? 0.02 : -0.02);
-}
+// for (let i = 0; i < 20; i++) {
+//     waterSimulation.addDrop(Math.random() * 2 - 1, Math.random() * 2 - 1, 0.03, i & 1 ? 0.02 : -0.02);
+// }
 
 animate();
