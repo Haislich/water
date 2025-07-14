@@ -1,8 +1,10 @@
 import * as THREE from 'three';
 import sphereVert from '../shaders/sphere/vertex.glsl';
 import shpereFrag from '../shaders/sphere/fragment.glsl';
-import { LIGHT, SPHERE_CENTER } from './constants';
+import { LIGHT } from './utils/constants';
+import { SPHERE_CENTER } from './utils/globals';
 import { params } from './utils/simulationParameters';
+import type { WaterSimulation } from './waterSimulation';
 export class Sphere {
     public geometry;
     public mesh;
@@ -45,9 +47,10 @@ export class Sphere {
         const x = Math.max(-limit, Math.min(limit, this.mesh.position.x + dx));
         const y = this.mesh.position.y + dy;
         const z = Math.max(-limit, Math.min(limit, this.mesh.position.z + dz));
-
+        this.oldCenter = SPHERE_CENTER.clone();
         const newPos = new THREE.Vector3(x, y, z);
-        this.newCenter = newPos;
+        // this.newCenter = newPos;
+        SPHERE_CENTER.copy(newPos);
         this.mesh.material.uniforms.sphereCenter.value.copy(newPos);
         this.mesh.position.copy(newPos);
 
@@ -55,7 +58,7 @@ export class Sphere {
     }
     updatePhysics(deltaTime: number, water: WaterSimulation): void {
         // How submerged the center of the sphere is
-        const percentUnderwater = Math.max(0, Math.min(1, (params.sphereRadius - this.newCenter.y) / (2 * params.sphereRadius)));
+        const percentUnderwater = Math.max(0, Math.min(1, (params.sphereRadius - SPHERE_CENTER.y) / (2 * params.sphereRadius)));
 
         // Gravity scaled by underwater resistance
         const adjustedGravity = this.gravity.clone().multiplyScalar(deltaTime * (1 - 1.1 * percentUnderwater));
@@ -73,15 +76,15 @@ export class Sphere {
 
         // Move the sphere
         const delta = this.velocity.clone().multiplyScalar(deltaTime);
-        const prev = this.newCenter.clone();
+        const prev = SPHERE_CENTER.clone();
         this.move(delta.x, delta.y, delta.z);
-        // water.displaceVolume(prev, this.newCenter, this.radius);
+        water.displaceVolume(prev, SPHERE_CENTER, params.sphereRadius);
         this.oldCenter.copy(prev);
 
         // Bounce off the bottom
         const minY = params.sphereRadius - 1;
-        if (this.newCenter.y < minY) {
-            this.newCenter.y = minY;
+        if (SPHERE_CENTER.y < minY) {
+            SPHERE_CENTER.y = minY;
             this.velocity.y = Math.abs(this.velocity.y) * 0.7;
             this.mesh.position.y = minY;
             this.mesh.material.uniforms.sphereCenter.value.y = minY;

@@ -21,6 +21,7 @@ export const NOISE_TEXTURE = textureLoader.load('textures/noiseTexture.png');
 
 NOISE_TEXTURE.wrapS = THREE.RepeatWrapping;
 NOISE_TEXTURE.wrapT = THREE.RepeatWrapping;
+NOISE_TEXTURE.colorSpace = THREE.SRGBColorSpace;
 
 // export const FLOOR_COLOR = textureLoader.load('floor/sand_01_1k/textures/sand_01_diff_1k.jpg');
 
@@ -73,6 +74,7 @@ const context = CANVAS.getContext('webgl') as WebGLRenderingContext;
 export const RENDERER = new THREE.WebGLRenderer({ canvas: CANVAS, alpha: true, antialias: true, context });
 RENDERER.setSize(window.innerWidth, window.innerHeight);
 RENDERER.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+RENDERER.outputColorSpace = THREE.SRGBColorSpace;
 
 window.addEventListener('resize', () => {
     // Update camera
@@ -83,6 +85,3 @@ window.addEventListener('resize', () => {
     RENDERER.setSize(window.innerWidth, window.innerHeight);
     RENDERER.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 });
-
-export const SPHERE_RADIUS = 0.2;
-export const SPHERE_CENTER = new THREE.Vector3(0, -0.5, 0);

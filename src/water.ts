@@ -2,7 +2,8 @@ import * as THREE from 'three';
 import waterVert from '../shaders/water/vertex.glsl';
 import waterFrag from '../shaders/water/fragment.glsl';
 import { params } from '../src/utils/simulationParameters';
-import { CUBE_TEXTURE, LIGHT, FLOOR_COLOR, CAMERA, TILES, SPHERE_CENTER } from './constants';
+import { CUBE_TEXTURE, LIGHT, CAMERA, TILES } from './utils/constants';
+import { SPHERE_CENTER } from './utils/globals';
 export class Water {
     public geometry;
     public mesh;
@@ -27,6 +28,7 @@ export class Water {
                     sphereRadius: new THREE.Uniform(params.sphereRadius),
                     abovewaterColor: new THREE.Uniform(params.aboveWater),
                     underwaterColor: new THREE.Uniform(params.underWater),
+                    wallLightAbsorption: new THREE.Uniform(params.wallLightAbsorption),
                 },
                 side: THREE.BackSide,
                 vertexShader: waterVert,
@@ -39,8 +41,10 @@ export class Water {
         const isUnderwater = eyePosition.y < 0;
         this.mesh.material.uniforms['water'].value = waterTexture;
         this.mesh.material.uniforms['causticTex'].value = causticsTexture;
-        this.mesh.material.uniforms.sphereRadius.value = params.sphereRadius;
-        this.mesh.material.uniforms.underwater.value = isUnderwater;
+        this.mesh.material.uniforms['sphereRadius'].value = params.sphereRadius;
+        this.mesh.material.uniforms['wallLightAbsorption'].value = params.wallLightAbsorption;
+        this.mesh.material.uniforms['underwater'].value = isUnderwater;
+        this.mesh.material.uniforms['sphereCenter'].value = SPHERE_CENTER;
         this.mesh.material.side = isUnderwater ? THREE.FrontSide : THREE.BackSide;
         this.mesh.material.uniforms.eye.value = CAMERA.position.clone();
     }

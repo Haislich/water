@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import smokeVert from '../shaders/smoke/vertex.glsl';
 import smokeFrag from '../shaders/smoke/fragment.glsl';
-import { NOISE_TEXTURE } from './constants';
+import { NOISE_TEXTURE } from './utils/constants';
 export class Smoke {
     public mesh;
     constructor(width: number = 1.5, height: number = 2) {

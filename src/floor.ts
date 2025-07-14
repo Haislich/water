@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { FLOOR_ARM, FLOOR_COLOR, FLOOR_DISPLACEMENT, FLOOR_NORMAL } from './constants';
+import { FLOOR_ARM, FLOOR_COLOR, FLOOR_DISPLACEMENT, FLOOR_NORMAL } from './utils/constants';
 
 /**
  * Generates a custom alpha map with:

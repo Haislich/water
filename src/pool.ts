@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import poolVert from '../shaders/pool/vertex.glsl';
 import poolFrag from '../shaders/pool/fragment.glsl';
-import { FLOOR_COLOR, LIGHT, TILES } from './constants';
+import { LIGHT, TILES } from './utils/constants';
 import { params } from './utils/simulationParameters';
 
 export class Pool {
@@ -25,6 +25,8 @@ export class Pool {
                 tiles: { value: TILES },
                 water: { value: null },
                 causticTex: { value: null },
+                wallLightAbsorption: new THREE.Uniform(params.wallLightAbsorption),
+
                 underwaterColor: new THREE.Uniform(params.underWater),
             },
             vertexShader: poolVert,
@@ -37,5 +39,6 @@ export class Pool {
     updateUniforms(waterTexture: THREE.Texture, causticsTexture: THREE.Texture): void {
         this.material.uniforms['water'].value = waterTexture;
         this.material.uniforms['causticTex'].value = causticsTexture;
+        this.material.uniforms['wallLightAbsorption'].value = params.wallLightAbsorption;
     }
 }

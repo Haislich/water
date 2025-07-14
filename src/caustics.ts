@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 import causticVert from '../shaders/caustics/vertex.glsl';
 import causticFrag from '../shaders/caustics/fragment.glsl';
-import { CAMERA, LIGHT, RENDERER, SPHERE_CENTER } from './constants';
+import { CAMERA, LIGHT, RENDERER } from './utils/constants';
+import { SPHERE_CENTER } from './utils/globals';
 import { params } from './utils/simulationParameters';
 
 export class Caustics {
@@ -21,6 +22,7 @@ export class Caustics {
                 water: { value: null },
                 sphereCenter: new THREE.Uniform(SPHERE_CENTER),
                 sphereRadius: new THREE.Uniform(params.sphereRadius),
+                wallLightAbsorption: new THREE.Uniform(params.wallLightAbsorption),
             },
             vertexShader: causticVert,
             fragmentShader: causticFrag,
@@ -34,7 +36,8 @@ export class Caustics {
 
     update(waterTexture: THREE.Texture): void {
         this.causticMesh.material.uniforms['water'].value = waterTexture;
-        this.causticMesh.material.uniforms.sphereRadius.value = params.sphereRadius;
+        this.causticMesh.material.uniforms['sphereRadius'].value = params.sphereRadius;
+        this.causticMesh.material.uniforms['wallLightAbsorption'].value = params.wallLightAbsorption;
 
         // Bind the current texture
         RENDERER.setRenderTarget(this._texture);

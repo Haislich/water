@@ -7,12 +7,12 @@ import { Caustics } from './caustics';
 import { WaterSimulation } from './waterSimulation';
 import { Pool } from './pool';
 import utils from '../shaders/utils.glsl';
-import { CAMERA, CANVAS, CUBE_TEXTURE, DIRECTIONAL_LIGHT, RENDERER } from './constants';
+import { CAMERA, CANVAS, CUBE_TEXTURE, DIRECTIONAL_LIGHT, RENDERER } from './utils/constants';
 import { Floor } from './floor';
 import { Smoke } from './smoke';
 import { Sphere } from './sphere';
 import { Sky } from 'three/addons/objects/Sky.js';
-import { setupSimulationGUI } from './utils/simulationParameters';
+import { params, setupSimulationGUI } from './utils/simulationParameters';
 
 // const description = document.createElement('div');
 // description.innerHTML = `
@@ -62,25 +62,25 @@ scene.add(DIRECTIONAL_LIGHT);
 const cameraHelper = new THREE.CameraHelper(CAMERA);
 scene.add(cameraHelper);
 
-const sky = new Sky();
-sky.scale.setScalar(450000);
+// const sky = new Sky();
+// sky.scale.setScalar(450000);
 
-// const phi = THREE.MathUtils.degToRad(90);
-// const theta = THREE.MathUtils.degToRad(180);
-// const sunPosition = new THREE.Vector3().setFromSphericalCoords(1, phi, theta);
+// // const phi = THREE.MathUtils.degToRad(90);
+// // const theta = THREE.MathUtils.degToRad(180);
+// // const sunPosition = new THREE.Vector3().setFromSphericalCoords(1, phi, theta);
 
-// Assume DIRECTIONAL_LIGHT is already added to the scene
-// and has a position you want the sun to match
-const lightDir = DIRECTIONAL_LIGHT.position.clone().normalize();
+// // Assume DIRECTIONAL_LIGHT is already added to the scene
+// // and has a position you want the sun to match
+// const lightDir = DIRECTIONAL_LIGHT.position.clone().normalize();
 
-// The Sky shader expects the sun position as a direction vector,
-// typically with a large magnitude
-const sunPosition = lightDir.clone().multiplyScalar(450000);
-sky.material.uniforms.sunPosition.value.copy(sunPosition);
+// // The Sky shader expects the sun position as a direction vector,
+// // typically with a large magnitude
+// const sunPosition = lightDir.clone().multiplyScalar(450000);
+// sky.material.uniforms.sunPosition.value.copy(sunPosition);
 
-sky.material.uniforms.sunPosition.value = sunPosition;
+// sky.material.uniforms.sunPosition.value = sunPosition;
 
-scene.add(sky);
+// scene.add(sky);
 
 const waterSimulation = new WaterSimulation();
 const water = new Water();
@@ -91,23 +91,13 @@ scene.add(water.mesh);
 scene.add(pool.mesh);
 // scene.add(floor.mesh);
 
-// const gltfLoader = new GLTFLoader();
-// let duck: THREE.Mesh;
-// gltfLoader.load('/models/Duck/glTF/Duck.gltf', (gltf) => {
-//     duck = gltf.scene.children[0];
-//     duck.scale.setScalar(0.0025);
-//     duck.castShadow = true;
-//     duck.position.y -= 0.1;
-//     scene.add(duck);
-// });
-
+// TODO: FIX
 // const smoke1 = new Smoke();
 // smoke1.mesh.position.z += 0.5;
 // scene.add(smoke1.mesh);
 // const smoke2 = new Smoke();
 // scene.add(smoke2.mesh);
 // smoke2.mesh.position.x += 1;
-
 // smoke2.mesh.position.z -= 0.5;
 
 const sphere = new Sphere();
@@ -152,18 +142,17 @@ const onMouseMove = (event: MouseEvent): void => {
             const newCenter = intersectionPoint.clone().sub(dragOffset);
             const currentPos = sphere.mesh.position.clone();
             const delta = newCenter.sub(currentPos);
-            // sphere.move(delta.x, delta.y, delta.z);
-            // waterSimulation.displaceVolume(sphere.oldCenter, sphere.newCenter, sphere.radius);
+
             const prev = sphere.newCenter.clone(); // capture before move
             sphere.move(delta.x, delta.y, delta.z);
-            // waterSimulation.displaceVolume(prev, sphere.newCenter, sphere.radius);
-            sphere.oldCenter = prev; // update after the displacement
+            waterSimulation.displaceVolume(prev, sphere.newCenter, params.sphereRadius);
+            // sphere.oldCenter = prev; // update after the displacement
         }
     } else {
         // Regular water drop logic when not dragging
         const intersects = raycaster.intersectObject(targetmesh);
         for (const intersect of intersects) {
-            // waterSimulation.addDrop(intersect.point.x, intersect.point.z, 0.03, 0.04);
+            waterSimulation.addDrop(intersect.point.x, intersect.point.z, 0.03, 0.04);
         }
     }
 };

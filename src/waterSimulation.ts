@@ -7,7 +7,7 @@ import normalFrag from '../shaders/simulation/normal_fragment.glsl';
 import displaceFrag from '../shaders/simulation/displace_fragment.glsl';
 // import sphereFrag from '../shaders/simulation/sphere_fragment.glsl'
 
-import { CAMERA, RENDERER } from './constants';
+import { CAMERA, RENDERER } from './utils/constants';
 
 export class WaterSimulation {
     private geometry;
