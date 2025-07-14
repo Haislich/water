@@ -1,13 +1,13 @@
 precision highp float;
 const float IOR_AIR = 1.0;
 const float IOR_WATER = 1.333;
-const vec3 underwaterColor = vec3(0.4, 0.9, 1.0);
 
 uniform vec3 light;
 uniform vec3 sphereCenter;
 uniform float sphereRadius;
 uniform sampler2D causticTex;
 uniform sampler2D water;
+uniform vec3 underwaterColor;
 
 vec3 getSphereColor(vec3 point) {
     vec3 color = vec3(0.5);        /* ambient occlusion with walls */    

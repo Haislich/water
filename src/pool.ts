@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import poolVert from '../shaders/pool/vertex.glsl';
 import poolFrag from '../shaders/pool/fragment.glsl';
 import { FLOOR_COLOR, LIGHT, TILES } from './constants';
+import { params } from './utils/simulationParameters';
 
 export class Pool {
     private geometry;
@@ -24,6 +25,7 @@ export class Pool {
                 tiles: { value: TILES },
                 water: { value: null },
                 causticTex: { value: null },
+                underwaterColor: new THREE.Uniform(params.underWater),
             },
             vertexShader: poolVert,
             fragmentShader: poolFrag,

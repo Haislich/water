@@ -1,7 +1,6 @@
 import GUI from 'lil-gui';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 import { Water } from './water';
 import { Caustics } from './caustics';
@@ -13,20 +12,23 @@ import { Floor } from './floor';
 import { Smoke } from './smoke';
 import { Sphere } from './sphere';
 import { Sky } from 'three/addons/objects/Sky.js';
+import { setupSimulationGUI } from './utils/simulationParameters';
+
+// const description = document.createElement('div');
+// description.innerHTML = `
+//   <strong>Project:</strong> Water Simulation<br>
+//   <em>This project showcases animated water using custom shaders and an EXR environment map.</em>
+// `;
+// description.style.padding = '8px';
+// description.style.fontSize = '12px';
+// description.style.lineHeight = '1.4';
+// description.style.color = '#ccc';
+
+// // Inject into GUI
+// gui.domElement.prepend(description);
+
 const gui = new GUI({ width: 340 });
-
-const description = document.createElement('div');
-description.innerHTML = `
-  <strong>Project:</strong> Water Simulation<br>
-  <em>This project showcases animated water using custom shaders and an EXR environment map.</em>
-`;
-description.style.padding = '8px';
-description.style.fontSize = '12px';
-description.style.lineHeight = '1.4';
-description.style.color = '#ccc';
-
-// Inject into GUI
-gui.domElement.prepend(description);
+setupSimulationGUI(gui);
 
 // Inject utilities into the shaders.
 // This means that shaders will be able to use the
@@ -35,8 +37,6 @@ gui.domElement.prepend(description);
 
 const scene = new THREE.Scene();
 
-// scene.fog = new THREE.Fog(new THREE.Color('#9e7f3c'), 1, 5);
-// scene.background = BACKGROUND;
 // Create mouse Controls
 const controls = new OrbitControls(CAMERA, CANVAS);
 controls.rotateSpeed = 2.5;
@@ -89,7 +89,7 @@ const pool = new Pool();
 const floor = new Floor();
 scene.add(water.mesh);
 scene.add(pool.mesh);
-scene.add(floor.mesh);
+// scene.add(floor.mesh);
 
 // const gltfLoader = new GLTFLoader();
 // let duck: THREE.Mesh;
@@ -117,20 +117,17 @@ scene.add(sphere.mesh);
 const clock = new THREE.Clock();
 
 const animate = (): void => {
-    const deltaTime = clock.getDelta(); // better for consistent time steps
-    const elapsedTime = clock.getElapsedTime();
+    const deltaTime = clock.getDelta();
 
     waterSimulation.stepSimulation();
     waterSimulation.updateNormals();
-    // sphere.move(Math.sin(elapsedTime), 0, Math.cos(elapsedTime));
-    // waterSimulation.displaceVolume(sphere.oldCenter, sphere.newCenter, sphere.radius);
 
     caustics.update(waterSimulation.texture);
     water.updateUniforms(waterSimulation.texture, caustics.texture);
     pool.updateUniforms(waterSimulation.texture, caustics.texture);
-    sphere.mesh.material.uniforms.caustics.value = caustics.texture;
-    sphere.mesh.material.uniforms.water.value = waterSimulation.texture;
+    sphere.updateUniforms(waterSimulation.texture, caustics.texture);
     sphere.updatePhysics(deltaTime, waterSimulation);
+
     RENDERER.render(scene, CAMERA);
     controls.update();
     window.requestAnimationFrame(animate);
@@ -159,14 +156,14 @@ const onMouseMove = (event: MouseEvent): void => {
             // waterSimulation.displaceVolume(sphere.oldCenter, sphere.newCenter, sphere.radius);
             const prev = sphere.newCenter.clone(); // capture before move
             sphere.move(delta.x, delta.y, delta.z);
-            waterSimulation.displaceVolume(prev, sphere.newCenter, sphere.radius);
+            // waterSimulation.displaceVolume(prev, sphere.newCenter, sphere.radius);
             sphere.oldCenter = prev; // update after the displacement
         }
     } else {
         // Regular water drop logic when not dragging
         const intersects = raycaster.intersectObject(targetmesh);
         for (const intersect of intersects) {
-            waterSimulation.addDrop(intersect.point.x, intersect.point.z, 0.03, 0.04);
+            // waterSimulation.addDrop(intersect.point.x, intersect.point.z, 0.03, 0.04);
         }
     }
 };

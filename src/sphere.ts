@@ -1,11 +1,11 @@
 import * as THREE from 'three';
 import sphereVert from '../shaders/sphere/vertex.glsl';
 import shpereFrag from '../shaders/sphere/fragment.glsl';
-import { LIGHT, SPHERE_CENTER, SPHERE_RADIUS } from './constants';
+import { LIGHT, SPHERE_CENTER } from './constants';
+import { params } from './utils/simulationParameters';
 export class Sphere {
     public geometry;
     public mesh;
-    public radius;
     public oldCenter = SPHERE_CENTER.clone();
     public newCenter = SPHERE_CENTER.clone();
     public velocity = new THREE.Vector3();
@@ -13,9 +13,8 @@ export class Sphere {
     public gravity = new THREE.Vector3(0, -4, 0);
     public usePhysics = false;
 
-    constructor(radius: number = 1, mass: number = 1) {
+    constructor(mass: number = 1) {
         this.mass = mass;
-        this.radius = SPHERE_RADIUS;
         this.geometry = new THREE.SphereGeometry();
         this.mesh = new THREE.Mesh(
             this.geometry,
@@ -25,9 +24,10 @@ export class Sphere {
                 uniforms: {
                     light: new THREE.Uniform(LIGHT),
                     sphereCenter: new THREE.Uniform(SPHERE_CENTER),
-                    sphereRadius: new THREE.Uniform(SPHERE_RADIUS),
+                    sphereRadius: new THREE.Uniform(params.sphereRadius),
                     caustics: new THREE.Uniform(null),
                     water: new THREE.Uniform(null),
+                    underwaterColor: new THREE.Uniform(params.underWater),
                 },
             })
             // new THREE.MeshBasicMaterial()
@@ -35,8 +35,13 @@ export class Sphere {
 
         // this.mesh.visible = false;
     }
+    updateUniforms(waterSimulationTexture: THREE.Texture, causticsTexture: THREE.Texture): void {
+        this.mesh.material.uniforms.caustics.value = causticsTexture;
+        this.mesh.material.uniforms.water.value = waterSimulationTexture;
+        this.mesh.material.uniforms.sphereRadius.value = params.sphereRadius;
+    }
     move(dx: number, dy: number, dz: number): THREE.Vector3 {
-        const limit = 1 - this.radius;
+        const limit = 1 - params.sphereRadius;
         const x = Math.max(-limit, Math.min(limit, this.mesh.position.x + dx));
         const y = this.mesh.position.y + dy;
         const z = Math.max(-limit, Math.min(limit, this.mesh.position.z + dz));
@@ -50,7 +55,7 @@ export class Sphere {
     }
     updatePhysics(deltaTime: number, water: WaterSimulation): void {
         // How submerged the center of the sphere is
-        const percentUnderwater = Math.max(0, Math.min(1, (this.radius - this.newCenter.y) / (2 * this.radius)));
+        const percentUnderwater = Math.max(0, Math.min(1, (params.sphereRadius - this.newCenter.y) / (2 * params.sphereRadius)));
 
         // Gravity scaled by underwater resistance
         const adjustedGravity = this.gravity.clone().multiplyScalar(deltaTime * (1 - 1.1 * percentUnderwater));
@@ -70,11 +75,11 @@ export class Sphere {
         const delta = this.velocity.clone().multiplyScalar(deltaTime);
         const prev = this.newCenter.clone();
         this.move(delta.x, delta.y, delta.z);
-        water.displaceVolume(prev, this.newCenter, this.radius);
+        // water.displaceVolume(prev, this.newCenter, this.radius);
         this.oldCenter.copy(prev);
 
         // Bounce off the bottom
-        const minY = this.radius - 1;
+        const minY = params.sphereRadius - 1;
         if (this.newCenter.y < minY) {
             this.newCenter.y = minY;
             this.velocity.y = Math.abs(this.velocity.y) * 0.7;

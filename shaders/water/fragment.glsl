@@ -13,6 +13,9 @@ varying vec3 pos;
 uniform vec3 sphereCenter;
 uniform float sphereRadius;
 
+uniform vec3 abovewaterColor;
+uniform vec3 underwaterColor;
+
 vec3 getSphereColor(vec3 point) {
   vec3 color = vec3(0.5);        /* ambient occlusion with walls */    
   color *= 1.0 - 0.9 / pow((1.0 + sphereRadius - abs(point.x)) / sphereRadius, 3.0);

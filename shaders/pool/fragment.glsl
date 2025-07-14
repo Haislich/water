@@ -2,7 +2,7 @@ precision highp float;
 precision highp int;
 
 #include <utils>
-
+uniform vec3 underwaterColor;
 varying vec3 pos;
 
 void main() {
