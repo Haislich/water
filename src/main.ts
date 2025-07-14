@@ -105,12 +105,13 @@ const animate = (): void => {
     waterSimulation.updateNormals();
     // sphere.move(Math.sin(elapsedTime), 0, Math.cos(elapsedTime));
     // waterSimulation.displaceVolume(sphere.oldCenter, sphere.newCenter, sphere.radius);
+
     caustics.update(waterSimulation.texture);
     water.updateUniforms(waterSimulation.texture, caustics.texture);
     pool.updateUniforms(waterSimulation.texture, caustics.texture);
     sphere.mesh.material.uniforms.caustics.value = caustics.texture;
     sphere.mesh.material.uniforms.water.value = waterSimulation.texture;
-
+    sphere.updatePhysics(deltaTime, waterSimulation);
     RENDERER.render(scene, CAMERA);
     controls.update();
     window.requestAnimationFrame(animate);

@@ -8,10 +8,15 @@ export class Sphere {
     public radius;
     public oldCenter = SPHERE_CENTER.clone();
     public newCenter = SPHERE_CENTER.clone();
+    public velocity = new THREE.Vector3();
+    public mass: number;
+    public gravity = new THREE.Vector3(0, -4, 0);
+    public usePhysics = false;
 
-    constructor(radius: number = 1) {
+    constructor(radius: number = 1, mass: number = 1) {
+        this.mass = mass;
         this.radius = SPHERE_RADIUS;
-        this.geometry = new THREE.SphereGeometry(radius);
+        this.geometry = new THREE.SphereGeometry();
         this.mesh = new THREE.Mesh(
             this.geometry,
             new THREE.ShaderMaterial({
@@ -30,19 +35,10 @@ export class Sphere {
 
         // this.mesh.visible = false;
     }
-    // move(dx: number, dy: number, dz: number): void {
-    //     const limit = 1 - this.radius;
-    //     const x = Math.max(-limit, Math.min(limit, this.mesh.position.x + dx));
-    //     const y = Math.max(-limit, Math.min(limit, this.mesh.position.y + dy));
-    //     const z = Math.max(-limit, Math.min(limit, this.mesh.position.z + dz));
-    //     this.oldCenter = this.newCenter;
-    //     this.newCenter = new THREE.Vector3(x, y, z);
-    //     this.mesh.material.uniforms.sphereCenter.value.set(x, y, z);
-    // }
     move(dx: number, dy: number, dz: number): THREE.Vector3 {
         const limit = 1 - this.radius;
         const x = Math.max(-limit, Math.min(limit, this.mesh.position.x + dx));
-        const y = Math.max(-limit, Math.min(limit, this.mesh.position.y + dy));
+        const y = this.mesh.position.y + dy; //Math.max(-limit, Math.min(limit, this.mesh.position.y + dy));
         const z = Math.max(-limit, Math.min(limit, this.mesh.position.z + dz));
 
         const newPos = new THREE.Vector3(x, y, z);
@@ -51,5 +47,39 @@ export class Sphere {
         this.mesh.position.copy(newPos);
 
         return newPos;
+    }
+    updatePhysics(deltaTime: number, water: WaterSimulation): void {
+        // How submerged the center of the sphere is
+        const percentUnderwater = Math.max(0, Math.min(1, (this.radius - this.newCenter.y) / (2 * this.radius)));
+
+        // Gravity scaled by underwater resistance
+        const adjustedGravity = this.gravity.clone().multiplyScalar(deltaTime * (1 - 1.1 * percentUnderwater));
+        this.velocity.add(adjustedGravity);
+
+        // Extra damping due to viscosity under water
+        const speed = this.velocity.length();
+        if (speed > 0.0001) {
+            const drag = this.velocity
+                .clone()
+                .normalize()
+                .multiplyScalar(percentUnderwater * deltaTime * speed * speed);
+            this.velocity.sub(drag);
+        }
+
+        // Move the sphere
+        const delta = this.velocity.clone().multiplyScalar(deltaTime);
+        const prev = this.newCenter.clone();
+        this.move(delta.x, delta.y, delta.z);
+        water.displaceVolume(prev, this.newCenter, this.radius);
+        this.oldCenter.copy(prev);
+
+        // Bounce off the bottom
+        const minY = this.radius - 1;
+        if (this.newCenter.y < minY) {
+            this.newCenter.y = minY;
+            this.velocity.y = Math.abs(this.velocity.y) * 0.7;
+            this.mesh.position.y = minY;
+            this.mesh.material.uniforms.sphereCenter.value.y = minY;
+        }
     }
 }
