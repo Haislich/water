@@ -1,9 +1,8 @@
 import * as THREE from 'three';
 import sphereVert from '../shaders/sphere/vertex.glsl';
 import shpereFrag from '../shaders/sphere/fragment.glsl';
-import { LIGHT } from './utils/constants';
 import { SPHERE_CENTER } from './utils/globals';
-import { params } from './utils/simulationParameters';
+import { params, DIRECTIONAL_LIGHT } from './utils/simulationParameters';
 import type { WaterSimulation } from './waterSimulation';
 export class Sphere {
     public geometry;
@@ -24,7 +23,7 @@ export class Sphere {
                 vertexShader: sphereVert,
                 fragmentShader: shpereFrag,
                 uniforms: {
-                    light: new THREE.Uniform(LIGHT),
+                    light: new THREE.Uniform(DIRECTIONAL_LIGHT.position),
                     sphereCenter: new THREE.Uniform(SPHERE_CENTER),
                     sphereRadius: new THREE.Uniform(params.sphereRadius),
                     caustics: new THREE.Uniform(null),

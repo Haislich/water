@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 import causticVert from '../shaders/caustics/vertex.glsl';
 import causticFrag from '../shaders/caustics/fragment.glsl';
-import { CAMERA, LIGHT, RENDERER } from './utils/constants';
+import { CAMERA, RENDERER } from './utils/constants';
 import { SPHERE_CENTER } from './utils/globals';
-import { params } from './utils/simulationParameters';
+import { DIRECTIONAL_LIGHT, params } from './utils/simulationParameters';
 
 export class Caustics {
     private geometry;
@@ -18,7 +18,7 @@ export class Caustics {
 
         const material = new THREE.RawShaderMaterial({
             uniforms: {
-                light: { value: LIGHT },
+                light: { value: DIRECTIONAL_LIGHT.position },
                 water: { value: null },
                 sphereCenter: new THREE.Uniform(SPHERE_CENTER),
                 sphereRadius: new THREE.Uniform(params.sphereRadius),

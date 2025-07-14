@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 import waterVert from '../shaders/water/vertex.glsl';
 import waterFrag from '../shaders/water/fragment.glsl';
-import { params } from '../src/utils/simulationParameters';
-import { CUBE_TEXTURE, LIGHT, CAMERA, TILES } from './utils/constants';
+import { DIRECTIONAL_LIGHT, params } from '../src/utils/simulationParameters';
+import { CUBE_TEXTURE, CAMERA, TILES } from './utils/constants';
 import { SPHERE_CENTER } from './utils/globals';
 export class Water {
     public geometry;
@@ -17,7 +17,15 @@ export class Water {
             this.geometry,
             new THREE.ShaderMaterial({
                 uniforms: {
-                    light: { value: LIGHT },
+                    // float Uniforms, must be manually updated !!!!
+                    wallLightAbsorption: new THREE.Uniform(params.wallLightAbsorption),
+                    aoStrength: new THREE.Uniform(params.aoStrength),
+                    aoFalloffPower: new THREE.Uniform(params.aoFalloffPower),
+                    baseLightDiffuse: new THREE.Uniform(params.baseLightDiffuse),
+                    causticProjectionScale: new THREE.Uniform(params.causticProjectionScale),
+                    causticBoost: new THREE.Uniform(params.causticBoost),
+
+                    light: { value: DIRECTIONAL_LIGHT.position },
                     water: { value: null },
                     tiles: { value: TILES },
                     sky: { value: CUBE_TEXTURE },
@@ -28,7 +36,6 @@ export class Water {
                     sphereRadius: new THREE.Uniform(params.sphereRadius),
                     abovewaterColor: new THREE.Uniform(params.aboveWater),
                     underwaterColor: new THREE.Uniform(params.underWater),
-                    wallLightAbsorption: new THREE.Uniform(params.wallLightAbsorption),
                 },
                 side: THREE.BackSide,
                 vertexShader: waterVert,
@@ -37,12 +44,19 @@ export class Water {
         );
     }
     updateUniforms(waterTexture: THREE.Texture, causticsTexture: THREE.Texture): void {
+        // Setting up float uniforms
+        this.mesh.material.uniforms['wallLightAbsorption'].value = params.wallLightAbsorption;
+        this.mesh.material.uniforms['aoStrength'].value = params.aoStrength;
+        this.mesh.material.uniforms['aoFalloffPower'].value = params.aoFalloffPower;
+        this.mesh.material.uniforms['baseLightDiffuse'].value = params.baseLightDiffuse;
+        this.mesh.material.uniforms['causticProjectionScale'].value = params.causticProjectionScale;
+        this.mesh.material.uniforms['causticBoost'].value = params.causticBoost;
+
         const eyePosition = CAMERA.position;
         const isUnderwater = eyePosition.y < 0;
         this.mesh.material.uniforms['water'].value = waterTexture;
         this.mesh.material.uniforms['causticTex'].value = causticsTexture;
         this.mesh.material.uniforms['sphereRadius'].value = params.sphereRadius;
-        this.mesh.material.uniforms['wallLightAbsorption'].value = params.wallLightAbsorption;
         this.mesh.material.uniforms['underwater'].value = isUnderwater;
         this.mesh.material.uniforms['sphereCenter'].value = SPHERE_CENTER;
         this.mesh.material.side = isUnderwater ? THREE.FrontSide : THREE.BackSide;

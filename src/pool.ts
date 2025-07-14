@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 import poolVert from '../shaders/pool/vertex.glsl';
 import poolFrag from '../shaders/pool/fragment.glsl';
-import { LIGHT, TILES } from './utils/constants';
-import { params } from './utils/simulationParameters';
+import { TILES } from './utils/constants';
+import { DIRECTIONAL_LIGHT, params } from './utils/simulationParameters';
 
 export class Pool {
     private geometry;
@@ -21,7 +21,7 @@ export class Pool {
 
         this.material = new THREE.RawShaderMaterial({
             uniforms: {
-                light: { value: LIGHT },
+                light: { value: DIRECTIONAL_LIGHT.position },
                 tiles: { value: TILES },
                 water: { value: null },
                 causticTex: { value: null },

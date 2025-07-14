@@ -7,12 +7,12 @@ import { Caustics } from './caustics';
 import { WaterSimulation } from './waterSimulation';
 import { Pool } from './pool';
 import utils from '../shaders/utils.glsl';
-import { CAMERA, CANVAS, CUBE_TEXTURE, DIRECTIONAL_LIGHT, RENDERER } from './utils/constants';
+import { CAMERA, CANVAS, CUBE_TEXTURE, RENDERER } from './utils/constants';
 import { Floor } from './floor';
 import { Smoke } from './smoke';
 import { Sphere } from './sphere';
 import { Sky } from 'three/addons/objects/Sky.js';
-import { params, setupSimulationGUI } from './utils/simulationParameters';
+import { DIRECTIONAL_LIGHT, params, setupSimulationGUI } from './utils/simulationParameters';
 
 // const description = document.createElement('div');
 // description.innerHTML = `
@@ -59,8 +59,8 @@ position.needsUpdate = true;
 
 const targetmesh = new THREE.Mesh(targetgeometry);
 scene.add(DIRECTIONAL_LIGHT);
-const cameraHelper = new THREE.CameraHelper(CAMERA);
-scene.add(cameraHelper);
+// const cameraHelper = new THREE.CameraHelper(CAMERA);
+// scene.add(cameraHelper);
 
 // const sky = new Sky();
 // sky.scale.setScalar(450000);
@@ -106,6 +106,8 @@ scene.add(sphere.mesh);
 // Main rendering loop
 const clock = new THREE.Clock();
 
+let frameCount = 0;
+
 const animate = (): void => {
     const deltaTime = clock.getDelta();
 
@@ -113,6 +115,7 @@ const animate = (): void => {
     waterSimulation.updateNormals();
 
     caustics.update(waterSimulation.texture);
+
     water.updateUniforms(waterSimulation.texture, caustics.texture);
     pool.updateUniforms(waterSimulation.texture, caustics.texture);
     sphere.updateUniforms(waterSimulation.texture, caustics.texture);
@@ -121,7 +124,10 @@ const animate = (): void => {
     RENDERER.render(scene, CAMERA);
     controls.update();
     window.requestAnimationFrame(animate);
+
+    frameCount++;
 };
+
 let isDragging = false;
 const dragPlane = new THREE.Plane();
 const dragOffset = new THREE.Vector3();
@@ -152,7 +158,7 @@ const onMouseMove = (event: MouseEvent): void => {
         // Regular water drop logic when not dragging
         const intersects = raycaster.intersectObject(targetmesh);
         for (const intersect of intersects) {
-            waterSimulation.addDrop(intersect.point.x, intersect.point.z, 0.03, 0.04);
+            waterSimulation.addDrop(intersect.point.x, intersect.point.z, 0.01, 0.04);
         }
     }
 };
