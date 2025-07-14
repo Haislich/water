@@ -1,5 +1,4 @@
-// #extension GL_OES_standard_derivatives : enable
-
+#extension GL_OES_standard_derivatives : enable
 precision highp float;
 precision highp int;
 
@@ -15,8 +14,8 @@ varying vec3 ray;
 
 void main() {
     // Step 1: Area ratio for caustics
-  float oldArea = 1.;// length(dFdx(oldPos)) * length(dFdy(oldPos));
-  float newArea = 1.;// length(dFdx(newPos)) * length(dFdy(newPos));
+  float oldArea = length(dFdx(oldPos)) * length(dFdy(oldPos));
+  float newArea = length(dFdx(newPos)) * length(dFdy(newPos));
   float intensity = oldArea / newArea * 0.2;
 
     // Step 2: Refracted light direction

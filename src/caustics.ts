@@ -23,7 +23,6 @@ export class Caustics {
             },
             vertexShader: causticVert,
             fragmentShader: causticFrag,
-            // glslVersion: THREE.GLSL3,
         });
 
         this.causticMesh = new THREE.Mesh(this.geometry, material);

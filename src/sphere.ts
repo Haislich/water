@@ -38,7 +38,7 @@ export class Sphere {
     move(dx: number, dy: number, dz: number): THREE.Vector3 {
         const limit = 1 - this.radius;
         const x = Math.max(-limit, Math.min(limit, this.mesh.position.x + dx));
-        const y = this.mesh.position.y + dy; //Math.max(-limit, Math.min(limit, this.mesh.position.y + dy));
+        const y = this.mesh.position.y + dy;
         const z = Math.max(-limit, Math.min(limit, this.mesh.position.z + dz));
 
         const newPos = new THREE.Vector3(x, y, z);
