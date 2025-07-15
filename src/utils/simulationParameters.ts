@@ -13,7 +13,7 @@ export const params = {
 
     dropRadius: 0.03,
     dropStrength: 0.04,
-    sphereRadius: 0.2,
+    sphereRadius: 0.3,
 
     // Light
     azimuth: 45,
@@ -22,22 +22,27 @@ export const params = {
     // Misc
     wallLightAbsorption: 0.5,
 };
-export const DIRECTIONAL_LIGHT = new THREE.DirectionalLight(0xffffff, 1);
-DIRECTIONAL_LIGHT.position.set(1, 1, -0.5).normalize();
-
+export const DIRECTIONAL_LIGHT = new THREE.DirectionalLight(0xf2f3ae, 0.01);
 export const updateLightDirection = (): void => {
-    const theta = THREE.MathUtils.degToRad(params.azimuth);
-    const phi = THREE.MathUtils.degToRad(params.altitude);
+    const theta = THREE.MathUtils.degToRad(params.azimuth); // horizontal angle around Y
+    const phi = THREE.MathUtils.degToRad(-params.altitude); // fixed altitude => equator (XZ-plane)
+    const r = 3; // radius
 
-    const x = Math.cos(phi) * Math.cos(theta);
-    const y = Math.sin(phi);
-    const z = Math.cos(phi) * Math.sin(theta);
+    // Point on the circle in XZ plane
+    const x = Math.cos(phi) * Math.cos(theta); // becomes cos(theta)
+    const y = Math.sin(phi); // becomes 0
+    const z = Math.cos(phi) * Math.sin(theta); // becomes sin(theta)
 
-    const dir = new THREE.Vector3(x, y, z).negate().normalize();
+    const dir = new THREE.Vector3(x, y, z).normalize();
 
-    DIRECTIONAL_LIGHT.position.copy(dir);
+    // Light is placed at point on the circumference, always pointing inward to origin
+    DIRECTIONAL_LIGHT.position.copy(dir.clone().multiplyScalar(-r));
+    // DIRECTIONAL_LIGHT.target.position.set(0, 0, 0);
+    // DIRECTIONAL_LIGHT.target.updateMatrixWorld();
+    DIRECTIONAL_LIGHT.lookAt(0, 0, 0);
 };
-// updateLightDirection();
+
+updateLightDirection();
 
 export const setupSimulationGUI = (gui: GUI): void => {
     const folder = gui.addFolder('Simulation Params');

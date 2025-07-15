@@ -16,13 +16,14 @@ export class Smoke {
                     uTime: new THREE.Uniform(Math.random()),
                     uPerlinNoise: new THREE.Uniform(NOISE_TEXTURE),
                 },
-                // avoid the smoke occluding itself
                 depthWrite: false,
             })
         );
         this.mesh.rotation.y = Math.random() * 2 * Math.PI;
-
         this.mesh.position.y += height / 2;
         this.mesh.position.x -= width / 2;
+    }
+    updateUniforms(uTime: number): void {
+        this.mesh.material.uniforms['uTime'].value = uTime;
     }
 }

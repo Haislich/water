@@ -51,8 +51,9 @@ vec3 getSurfaceRayColor(vec3 origin, vec3 ray, vec3 waterColor) {
       } else {
         color = textureCube(sky, ray).rgb;
 
-        float sunSpec = pow(max(0.0, dot(light, ray)), 5000.0);
-        color += sunSpec * vec3(10.0, 8.0, 6.0);
+        float sunSpec = pow(max(0.0, dot(light, ray)), 300.0);
+        //color += sunSpec * vec3(10.0, 8.0, 6.0);
+        sunSpec * vec3(2.0, 1.5, 1.0);
       }
     }
   }

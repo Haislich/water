@@ -13,29 +13,90 @@ import { Smoke } from './smoke';
 import { Sphere } from './sphere';
 import { Sky } from 'three/addons/objects/Sky.js';
 import { DIRECTIONAL_LIGHT, params, setupSimulationGUI } from './utils/simulationParameters';
+import { SPHERE_CENTER } from './utils/globals';
 
-// const description = document.createElement('div');
-// description.innerHTML = `
-//   <strong>Project:</strong> Water Simulation<br>
-//   <em>This project showcases animated water using custom shaders and an EXR environment map.</em>
-// `;
-// description.style.padding = '8px';
-// description.style.fontSize = '12px';
-// description.style.lineHeight = '1.4';
-// description.style.color = '#ccc';
+const setupGui = (gui: GUI): void => {
+    const description = document.createElement('div');
+    description.innerHTML = `
+      <strong>Project:</strong> Water Simulation<br>
+      <em>This project showcases animated hotsprings using custom shaders and Three JS.</em>
+    `;
+    description.style.padding = '8px';
+    description.style.fontSize = '12px';
+    description.style.lineHeight = '1.4';
+    description.style.color = '#ccc';
+    gui.domElement.prepend(description);
+    // gui.close();
+};
+const setupDebugGui = (gui: GUI, scene: THREE.Scene): void => {
+    const debugFolder = gui.addFolder('Debug');
+    const options = {
+        showDragPlane: false,
+        showLightHelper: false,
+        showCameraHelper: false,
+    };
 
-// // Inject into GUI
-// gui.domElement.prepend(description);
+    // Toggle for drag plane helper
+    debugFolder.add(options, 'showDragPlane').onChange((value: boolean) => {
+        if (value) {
+            if (!debugObjects.dragPlaneHelper) {
+                debugObjects.dragPlaneHelper = new THREE.PlaneHelper(dragPlane, 2, 0xff0000);
+                scene.add(debugObjects.dragPlaneHelper);
+            }
+        } else {
+            if (debugObjects.dragPlaneHelper) {
+                scene.remove(debugObjects.dragPlaneHelper);
+                debugObjects.dragPlaneHelper = null;
+            }
+        }
+    });
+
+    // Toggle for light helper
+    debugFolder.add(options, 'showLightHelper').onChange((value: boolean) => {
+        if (value) {
+            if (!debugObjects.lightHelper) {
+                debugObjects.lightHelper = new THREE.DirectionalLightHelper(DIRECTIONAL_LIGHT, 0.5);
+                scene.add(debugObjects.lightHelper);
+            }
+        } else {
+            if (debugObjects.lightHelper) {
+                scene.remove(debugObjects.lightHelper);
+                debugObjects.lightHelper = null;
+            }
+        }
+    });
+
+    // Toggle for camera helper
+    debugFolder.add(options, 'showCameraHelper').onChange((value: boolean) => {
+        if (value) {
+            if (!debugObjects.cameraHelper) {
+                debugObjects.cameraHelper = new THREE.CameraHelper(CAMERA);
+                scene.add(debugObjects.cameraHelper);
+            }
+        } else {
+            if (debugObjects.cameraHelper) {
+                scene.remove(debugObjects.cameraHelper);
+                debugObjects.cameraHelper = null;
+            }
+        }
+    });
+};
 
 const gui = new GUI({ width: 340 });
-setupSimulationGUI(gui);
+const scene = new THREE.Scene();
+const debugObjects = {
+    dragPlaneHelper: null as THREE.PlaneHelper | null,
+    lightHelper: null as THREE.DirectionalLightHelper | null,
+    cameraHelper: null as THREE.CameraHelper | null,
+};
 
+setupGui(gui);
+setupSimulationGUI(gui);
+setupDebugGui(gui, scene);
 // Inject utilities into the shaders.
 // This means that shaders will be able to use the
 // `#include <utils>` direcctive and utilize the contants and functions from there.
 (THREE.ShaderChunk as Record<string, string>)['utils'] = utils;
-
-const scene = new THREE.Scene();
 
 // Create mouse Controls
 const controls = new OrbitControls(CAMERA, CANVAS);
@@ -59,18 +120,13 @@ position.needsUpdate = true;
 
 const targetmesh = new THREE.Mesh(targetgeometry);
 scene.add(DIRECTIONAL_LIGHT);
+scene.add(DIRECTIONAL_LIGHT.target);
 // const cameraHelper = new THREE.CameraHelper(CAMERA);
 // scene.add(cameraHelper);
 
 // const sky = new Sky();
 // sky.scale.setScalar(450000);
 
-// // const phi = THREE.MathUtils.degToRad(90);
-// // const theta = THREE.MathUtils.degToRad(180);
-// // const sunPosition = new THREE.Vector3().setFromSphericalCoords(1, phi, theta);
-
-// // Assume DIRECTIONAL_LIGHT is already added to the scene
-// // and has a position you want the sun to match
 // const lightDir = DIRECTIONAL_LIGHT.position.clone().normalize();
 
 // // The Sky shader expects the sun position as a direction vector,
@@ -86,12 +142,11 @@ const waterSimulation = new WaterSimulation();
 const water = new Water();
 const caustics = new Caustics(water.geometry);
 const pool = new Pool();
-const floor = new Floor();
-scene.add(water.mesh);
+// const floor = new Floor();
 scene.add(pool.mesh);
+scene.add(water.mesh);
 // scene.add(floor.mesh);
 
-// TODO: FIX
 const smoke1 = new Smoke();
 smoke1.mesh.position.z += 0.5;
 scene.add(smoke1.mesh);
@@ -112,15 +167,14 @@ const animate = (): void => {
     waterSimulation.stepSimulation();
     waterSimulation.updateNormals();
 
-    caustics.update(waterSimulation.texture);
+    caustics.updateUniforms(waterSimulation.texture);
 
     water.updateUniforms(waterSimulation.texture, caustics.texture);
     pool.updateUniforms(waterSimulation.texture, caustics.texture);
     sphere.updateUniforms(waterSimulation.texture, caustics.texture);
     sphere.updatePhysics(deltaTime, waterSimulation);
-    // console.log(elapsedTime);
-    smoke1.mesh.material.uniforms['uTime'].value = elapsedTime;
-    smoke2.mesh.material.uniforms['uTime'].value = elapsedTime;
+    smoke1.updateUniforms(elapsedTime);
+    smoke2.updateUniforms(elapsedTime);
     RENDERER.render(scene, CAMERA);
     controls.update();
     window.requestAnimationFrame(animate);
@@ -131,35 +185,6 @@ const dragPlane = new THREE.Plane();
 const dragOffset = new THREE.Vector3();
 const intersectionPoint = new THREE.Vector3();
 
-const onMouseMove = (event: MouseEvent): void => {
-    const rect = CANVAS.getBoundingClientRect();
-    mouse.x = ((event.clientX - rect.left) * 2) / CANVAS.width - 1;
-    mouse.y = (-(event.clientY - rect.top) * 2) / CANVAS.height + 1;
-
-    raycaster.setFromCamera(mouse, CAMERA);
-
-    if (isDragging) {
-        // Ray-plane intersection to find 3D drag point
-        raycaster.ray.intersectPlane(dragPlane, intersectionPoint);
-
-        if (intersectionPoint) {
-            const newCenter = intersectionPoint.clone().sub(dragOffset);
-            const currentPos = sphere.mesh.position.clone();
-            const delta = newCenter.sub(currentPos);
-
-            const prev = sphere.newCenter.clone(); // capture before move
-            sphere.move(delta.x, delta.y, delta.z);
-            waterSimulation.displaceVolume(prev, sphere.newCenter, params.sphereRadius);
-            // sphere.oldCenter = prev; // update after the displacement
-        }
-    } else {
-        // Regular water drop logic when not dragging
-        const intersects = raycaster.intersectObject(targetmesh);
-        for (const intersect of intersects) {
-            waterSimulation.addDrop(intersect.point.x, intersect.point.z, 0.01, 0.04);
-        }
-    }
-};
 CANVAS.addEventListener('mousedown', (event) => {
     const rect = CANVAS.getBoundingClientRect();
     mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
@@ -171,25 +196,54 @@ CANVAS.addEventListener('mousedown', (event) => {
     if (intersects.length > 0) {
         controls.enabled = false;
         isDragging = true;
+        sphere.usePhysics = false;
 
-        dragPlane.setFromNormalAndCoplanarPoint(CAMERA.getWorldDirection(new THREE.Vector3()).negate(), intersects[0].point);
-        dragOffset.copy(intersects[0].point).sub(sphere.mesh.position);
+        const intersection = intersects[0].point.clone();
+        dragPlane.setFromNormalAndCoplanarPoint(CAMERA.getWorldDirection(new THREE.Vector3()).negate(), intersection);
+
+        // Use actual mesh position, not SPHERE_CENTER
+        dragOffset.copy(intersection).sub(sphere.mesh.position);
     } else {
         controls.enabled = true; // let orbit controls do their thing
         isDragging = false;
+
+        controls.enabled = true;
     }
 });
 
 CANVAS.addEventListener('mouseup', () => {
     isDragging = false;
+    sphere.usePhysics = true;
     controls.enabled = true;
 });
 
-// CANVAS.addEventListener('mousedown', onMouseDown);
-CANVAS.addEventListener('mousemove', onMouseMove);
-// CANVAS.addEventListener('mouseup', onMouseUp);
+CANVAS.addEventListener('mousemove', (event: MouseEvent): void => {
+    const rect = CANVAS.getBoundingClientRect();
+    mouse.x = ((event.clientX - rect.left) * 2) / CANVAS.width - 1;
+    mouse.y = (-(event.clientY - rect.top) * 2) / CANVAS.height + 1;
 
-// CANVAS.addEventListener('mousemove', onMouseMove);
+    raycaster.setFromCamera(mouse, CAMERA);
+
+    if (isDragging) {
+        // Ray-plane intersection to find 3D drag point
+        raycaster.ray.intersectPlane(dragPlane, intersectionPoint);
+        if (intersectionPoint) {
+            const newCenter = intersectionPoint.clone().sub(dragOffset);
+            const delta = newCenter.sub(SPHERE_CENTER);
+
+            const prev = sphere.center.clone(); // capture before move
+            sphere.move(delta.x, delta.y, delta.z);
+            waterSimulation.displaceVolume(prev, sphere.center, params.sphereRadius);
+        }
+    } else {
+        // Regular water drop logic when not dragging
+        const intersects = raycaster.intersectObject(targetmesh);
+        for (const intersect of intersects) {
+            waterSimulation.addDrop(intersect.point.x, intersect.point.z, 0.01, 0.04);
+        }
+    }
+});
+
 // for (let i = 0; i < 20; i++) {
 //     waterSimulation.addDrop(Math.random() * 2 - 1, Math.random() * 2 - 1, 0.03, i & 1 ? 0.02 : -0.02);
 // }

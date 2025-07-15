@@ -105,7 +105,7 @@ export class WaterSimulation {
         this._render(this.displaceMesh);
     }
 
-    _render(mesh: THREE.Mesh<THREE.PlaneGeometry, THREE.RawShaderMaterial, THREE.Object3DEventMap>): void {
+    _render(mesh: THREE.Mesh<THREE.PlaneGeometry, THREE.RawShaderMaterial>): void {
         // Swap textures
         const oldTexture = this._texture;
         const newTexture = this._texture === this.textureA ? this.textureB : this.textureA;

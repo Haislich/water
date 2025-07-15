@@ -1,80 +1,92 @@
 import * as THREE from 'three';
 import sphereVert from '../shaders/sphere/vertex.glsl';
-import shpereFrag from '../shaders/sphere/fragment.glsl';
+import sphereFrag from '../shaders/sphere/fragment.glsl';
 import { SPHERE_CENTER } from './utils/globals';
 import { params, DIRECTIONAL_LIGHT } from './utils/simulationParameters';
 import type { WaterSimulation } from './waterSimulation';
+
 export class Sphere {
-    public geometry;
-    public mesh;
+    public geometry: THREE.SphereGeometry;
+    public mesh: THREE.Mesh<THREE.SphereGeometry, THREE.ShaderMaterial>;
     public oldCenter = SPHERE_CENTER.clone();
-    public newCenter = SPHERE_CENTER.clone();
     public velocity = new THREE.Vector3();
     public mass: number;
     public gravity = new THREE.Vector3(0, -9.8, 0);
-    public usePhysics = false;
+    public usePhysics = true;
 
     constructor(mass: number = 1) {
         this.mass = mass;
         this.geometry = new THREE.SphereGeometry();
-        this.mesh = new THREE.Mesh(
-            this.geometry,
-            new THREE.ShaderMaterial({
-                vertexShader: sphereVert,
-                fragmentShader: shpereFrag,
-                uniforms: {
-                    wallLightAbsorption: new THREE.Uniform(params.wallLightAbsorption),
-                    aoStrength: new THREE.Uniform(params.aoStrength),
-                    aoFalloffPower: new THREE.Uniform(params.aoFalloffPower),
-                    baseLightDiffuse: new THREE.Uniform(params.baseLightDiffuse),
-                    causticProjectionScale: new THREE.Uniform(params.causticProjectionScale),
-                    causticBoost: new THREE.Uniform(params.causticBoost),
 
-                    light: new THREE.Uniform(DIRECTIONAL_LIGHT.position),
-                    sphereCenter: new THREE.Uniform(SPHERE_CENTER),
-                    sphereRadius: new THREE.Uniform(params.sphereRadius),
-                    caustics: new THREE.Uniform(null),
-                    water: new THREE.Uniform(null),
-                    underwaterColor: new THREE.Uniform(params.underWater),
-                },
-            })
-        );
+        const shaderMaterial = new THREE.ShaderMaterial({
+            vertexShader: sphereVert,
+            fragmentShader: sphereFrag,
+            uniforms: {
+                wallLightAbsorption: new THREE.Uniform(params.wallLightAbsorption),
+                aoStrength: new THREE.Uniform(params.aoStrength),
+                aoFalloffPower: new THREE.Uniform(params.aoFalloffPower),
+                baseLightDiffuse: new THREE.Uniform(params.baseLightDiffuse),
+                causticProjectionScale: new THREE.Uniform(params.causticProjectionScale),
+                causticBoost: new THREE.Uniform(params.causticBoost),
+
+                light: new THREE.Uniform(DIRECTIONAL_LIGHT.position),
+                sphereCenter: new THREE.Uniform(SPHERE_CENTER.clone()),
+                sphereRadius: new THREE.Uniform(params.sphereRadius),
+                caustics: new THREE.Uniform(null),
+                water: new THREE.Uniform(null),
+                underwaterColor: new THREE.Uniform(params.underWater),
+            },
+        });
+
+        this.mesh = new THREE.Mesh(this.geometry, shaderMaterial);
+        this.updatePosition(SPHERE_CENTER);
     }
+
+    get center(): THREE.Vector3 {
+        return SPHERE_CENTER;
+    }
+
     updateUniforms(waterSimulationTexture: THREE.Texture, causticsTexture: THREE.Texture): void {
-        this.mesh.material.uniforms.caustics.value = causticsTexture;
-        this.mesh.material.uniforms.water.value = waterSimulationTexture;
-        this.mesh.material.uniforms.sphereRadius.value = params.sphereRadius;
-
-        this.mesh.material.uniforms['wallLightAbsorption'].value = params.wallLightAbsorption;
-        this.mesh.material.uniforms['aoStrength'].value = params.aoStrength;
-        this.mesh.material.uniforms['aoFalloffPower'].value = params.aoFalloffPower;
-        this.mesh.material.uniforms['baseLightDiffuse'].value = params.baseLightDiffuse;
-        this.mesh.material.uniforms['causticProjectionScale'].value = params.causticProjectionScale;
-        this.mesh.material.uniforms['causticBoost'].value = params.causticBoost;
+        const uniforms = this.mesh.material.uniforms;
+        uniforms['caustics'].value = causticsTexture;
+        uniforms['water'].value = waterSimulationTexture;
+        uniforms['sphereRadius'].value = params.sphereRadius;
+        uniforms['wallLightAbsorption'].value = params.wallLightAbsorption;
+        uniforms['aoStrength'].value = params.aoStrength;
+        uniforms['aoFalloffPower'].value = params.aoFalloffPower;
+        uniforms['baseLightDiffuse'].value = params.baseLightDiffuse;
+        uniforms['causticProjectionScale'].value = params.causticProjectionScale;
+        uniforms['causticBoost'].value = params.causticBoost;
+        uniforms['sphereCenter'].value.copy(SPHERE_CENTER);
     }
+
     move(dx: number, dy: number, dz: number): THREE.Vector3 {
         const limit = 1 - params.sphereRadius;
-        const x = Math.max(-limit, Math.min(limit, this.mesh.position.x + dx));
-        const y = this.mesh.position.y + dy;
-        const z = Math.max(-limit, Math.min(limit, this.mesh.position.z + dz));
-        this.oldCenter = SPHERE_CENTER.clone();
-        const newPos = new THREE.Vector3(x, y, z);
-        // this.newCenter = newPos;
-        SPHERE_CENTER.copy(newPos);
-        this.mesh.material.uniforms.sphereCenter.value.copy(newPos);
-        this.mesh.position.copy(newPos);
 
+        const x = Math.max(-limit, Math.min(limit, this.mesh.position.x + dx));
+        const yMin = params.sphereRadius - 1;
+        const yMax = 1; // you can expose this if needed
+        const y = Math.max(yMin, Math.min(yMax, this.mesh.position.y + dy));
+        const z = Math.max(-limit, Math.min(limit, this.mesh.position.z + dz));
+
+        const newPos = new THREE.Vector3(x, y, z);
+        this.oldCenter.copy(SPHERE_CENTER);
+        this.updatePosition(newPos);
         return newPos;
     }
-    updatePhysics(deltaTime: number, water: WaterSimulation): void {
-        // How submerged the center of the sphere is
-        const percentUnderwater = Math.max(0, Math.min(1, (params.sphereRadius - SPHERE_CENTER.y) / (2 * params.sphereRadius)));
 
-        // Gravity scaled by underwater resistance
+    updatePhysics(deltaTime: number, water: WaterSimulation): void {
+        if (!this.usePhysics) return;
+
+        const y = SPHERE_CENTER.y;
+        const radius = params.sphereRadius;
+
+        // % submerged
+        const percentUnderwater = Math.max(0, Math.min(1, (radius - y) / (2 * radius)));
+
         const adjustedGravity = this.gravity.clone().multiplyScalar(deltaTime * (1 - 1.1 * percentUnderwater));
         this.velocity.add(adjustedGravity);
 
-        // Extra damping due to viscosity under water
         const speed = this.velocity.length();
         if (speed > 0.0001) {
             const drag = this.velocity
@@ -84,20 +96,35 @@ export class Sphere {
             this.velocity.sub(drag);
         }
 
-        // Move the sphere
         const delta = this.velocity.clone().multiplyScalar(deltaTime);
         const prev = SPHERE_CENTER.clone();
-        this.move(delta.x, delta.y, delta.z);
-        water.displaceVolume(prev, SPHERE_CENTER, params.sphereRadius);
-        this.oldCenter.copy(prev);
+        const bottomBefore = prev.y - radius;
 
-        // Bounce off the bottom
-        const minY = params.sphereRadius - 1;
+        this.move(delta.x, delta.y, delta.z);
+
+        const bottomAfter = SPHERE_CENTER.y - radius;
+
+        // Trigger a drop if it entered water this frame
+        const surfaceY = 0.0;
+        if (bottomBefore > surfaceY && bottomAfter <= surfaceY) {
+            // falling into the water
+            water.addDrop(SPHERE_CENTER.x, SPHERE_CENTER.z, 0.05, 0.5); // larger ripple
+        }
+
+        water.displaceVolume(prev, SPHERE_CENTER, radius);
+
+        const minY = radius - 1;
         if (SPHERE_CENTER.y < minY) {
             SPHERE_CENTER.y = minY;
             this.velocity.y = Math.abs(this.velocity.y) * 0.7;
             this.mesh.position.y = minY;
             this.mesh.material.uniforms.sphereCenter.value.y = minY;
         }
+    }
+
+    private updatePosition(pos: THREE.Vector3): void {
+        SPHERE_CENTER.copy(pos);
+        this.mesh.position.copy(pos);
+        this.mesh.material.uniforms.sphereCenter.value.copy(pos);
     }
 }
