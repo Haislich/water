@@ -92,24 +92,23 @@ scene.add(pool.mesh);
 // scene.add(floor.mesh);
 
 // TODO: FIX
-// const smoke1 = new Smoke();
-// smoke1.mesh.position.z += 0.5;
-// scene.add(smoke1.mesh);
-// const smoke2 = new Smoke();
-// scene.add(smoke2.mesh);
-// smoke2.mesh.position.x += 1;
-// smoke2.mesh.position.z -= 0.5;
+const smoke1 = new Smoke();
+smoke1.mesh.position.z += 0.5;
+scene.add(smoke1.mesh);
+const smoke2 = new Smoke();
+scene.add(smoke2.mesh);
+smoke2.mesh.position.x += 1;
+smoke2.mesh.position.z -= 0.5;
 
 const sphere = new Sphere();
 scene.add(sphere.mesh);
 
 // Main rendering loop
 const clock = new THREE.Clock();
-
-let frameCount = 0;
-
+const present = 0;
 const animate = (): void => {
     const deltaTime = clock.getDelta();
+    const elapsedTime = clock.getElapsedTime();
 
     waterSimulation.stepSimulation();
     waterSimulation.updateNormals();
@@ -120,12 +119,12 @@ const animate = (): void => {
     pool.updateUniforms(waterSimulation.texture, caustics.texture);
     sphere.updateUniforms(waterSimulation.texture, caustics.texture);
     sphere.updatePhysics(deltaTime, waterSimulation);
-
+    console.log(elapsedTime);
+    smoke1.mesh.material.uniforms['uTime'].value = elapsedTime;
+    smoke2.mesh.material.uniforms['uTime'].value = elapsedTime;
     RENDERER.render(scene, CAMERA);
     controls.update();
     window.requestAnimationFrame(animate);
-
-    frameCount++;
 };
 
 let isDragging = false;

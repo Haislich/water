@@ -4,13 +4,8 @@ precision highp int;
 
 #include <utils> // includes intersectCube, IOR_AIR, IOR_WATER, poolHeight
 
-// uniform vec3 light;
-uniform vec3 sphereCenter;
-uniform float sphereRadius;
-
 varying vec3 oldPos;
 varying vec3 newPos;
-varying vec3 ray;
 
 void main() {
     // Step 1: Area ratio for caustics

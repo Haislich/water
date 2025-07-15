@@ -11,7 +11,7 @@ export class Sphere {
     public newCenter = SPHERE_CENTER.clone();
     public velocity = new THREE.Vector3();
     public mass: number;
-    public gravity = new THREE.Vector3(0, -4, 0);
+    public gravity = new THREE.Vector3(0, -9.8, 0);
     public usePhysics = false;
 
     constructor(mass: number = 1) {
@@ -23,6 +23,13 @@ export class Sphere {
                 vertexShader: sphereVert,
                 fragmentShader: shpereFrag,
                 uniforms: {
+                    wallLightAbsorption: new THREE.Uniform(params.wallLightAbsorption),
+                    aoStrength: new THREE.Uniform(params.aoStrength),
+                    aoFalloffPower: new THREE.Uniform(params.aoFalloffPower),
+                    baseLightDiffuse: new THREE.Uniform(params.baseLightDiffuse),
+                    causticProjectionScale: new THREE.Uniform(params.causticProjectionScale),
+                    causticBoost: new THREE.Uniform(params.causticBoost),
+
                     light: new THREE.Uniform(DIRECTIONAL_LIGHT.position),
                     sphereCenter: new THREE.Uniform(SPHERE_CENTER),
                     sphereRadius: new THREE.Uniform(params.sphereRadius),
@@ -31,15 +38,19 @@ export class Sphere {
                     underwaterColor: new THREE.Uniform(params.underWater),
                 },
             })
-            // new THREE.MeshBasicMaterial()
         );
-
-        // this.mesh.visible = false;
     }
     updateUniforms(waterSimulationTexture: THREE.Texture, causticsTexture: THREE.Texture): void {
         this.mesh.material.uniforms.caustics.value = causticsTexture;
         this.mesh.material.uniforms.water.value = waterSimulationTexture;
         this.mesh.material.uniforms.sphereRadius.value = params.sphereRadius;
+
+        this.mesh.material.uniforms['wallLightAbsorption'].value = params.wallLightAbsorption;
+        this.mesh.material.uniforms['aoStrength'].value = params.aoStrength;
+        this.mesh.material.uniforms['aoFalloffPower'].value = params.aoFalloffPower;
+        this.mesh.material.uniforms['baseLightDiffuse'].value = params.baseLightDiffuse;
+        this.mesh.material.uniforms['causticProjectionScale'].value = params.causticProjectionScale;
+        this.mesh.material.uniforms['causticBoost'].value = params.causticBoost;
     }
     move(dx: number, dy: number, dz: number): THREE.Vector3 {
         const limit = 1 - params.sphereRadius;

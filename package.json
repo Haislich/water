@@ -21,7 +21,7 @@
     "vite-plugin-glsl": "^1.5.1"
   },
   "dependencies": {
-    "@types/three": "^0.152.1",
+    "@types/three": "0.152.0",
     "gl-matrix": "^3.4.3",
     "lil-gui": "^0.20.0",
     "three": "0.152.0",
