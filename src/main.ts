@@ -1,13 +1,14 @@
 import GUI from 'lil-gui';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 import { Water } from './water';
 import { Caustics } from './caustics';
 import { WaterSimulation } from './waterSimulation';
 import { Pool } from './pool';
 import utils from '../shaders/utils.glsl';
-import { CAMERA, CANVAS, CUBE_TEXTURE, RENDERER } from './utils/constants';
+import { CAMERA, CANVAS, RENDERER } from './utils/constants';
 import { Floor } from './floor';
 import { Smoke } from './smoke';
 import { Sphere } from './sphere';
@@ -26,7 +27,7 @@ const setupGui = (gui: GUI): void => {
     description.style.lineHeight = '1.4';
     description.style.color = '#ccc';
     gui.domElement.prepend(description);
-    // gui.close();
+    gui.close();
 };
 const setupDebugGui = (gui: GUI, scene: THREE.Scene): void => {
     const debugFolder = gui.addFolder('Debug');
@@ -81,6 +82,36 @@ const setupDebugGui = (gui: GUI, scene: THREE.Scene): void => {
         }
     });
 };
+type LabeledObject = {
+    name: string;
+    object: THREE.Object3D;
+};
+
+export const setupMountainGui = (gui: GUI, mountains: LabeledObject[]): void => {
+    const folder = gui.addFolder('Mountains');
+
+    mountains.forEach(({ name, object }) => {
+        const sub = folder.addFolder(name);
+
+        const pos = object.position;
+        sub.add(pos, 'x', -50, 50, 0.1).name('Position X');
+        sub.add(pos, 'y', -10, 20, 0.1).name('Position Y');
+        sub.add(pos, 'z', -50, 50, 0.1).name('Position Z');
+
+        const rot = object.rotation;
+        sub.add(rot, 'y', -Math.PI, Math.PI, 0.01).name('Rotation Y');
+
+        const uniformScale = { scale: object.scale.x }; // local control
+
+        sub.add(uniformScale, 'scale', 0.1, 5, 0.01)
+            .name('Scale')
+            .onChange((v: number) => {
+                object.scale.set(v, v, v);
+            });
+    });
+
+    folder.open();
+};
 
 const gui = new GUI({ width: 340 });
 const scene = new THREE.Scene();
@@ -103,6 +134,11 @@ const controls = new OrbitControls(CAMERA, CANVAS);
 controls.rotateSpeed = 2.5;
 controls.zoomSpeed = 1.2;
 controls.panSpeed = 0.9;
+controls.maxDistance = 5;
+controls.maxAzimuthAngle = Math.PI / 6 + Math.PI;
+controls.minAzimuthAngle = -Math.PI / 4 + Math.PI;
+
+console.log(controls);
 
 // Ray caster
 const raycaster = new THREE.Raycaster();
@@ -118,34 +154,94 @@ for (let i = 0; i < position.count; i++) {
 
 position.needsUpdate = true;
 
+const gltfLoader = new GLTFLoader();
+
+gltfLoader.load('/models/mountain/scene.gltf', (gltf) => {
+    const mountain1 = gltf.scene.clone();
+    mountain1.position.set(-16.1, 1.6, 5.7);
+    mountain1.rotateY(0.6);
+
+    const mountain2 = gltf.scene.clone();
+    mountain2.position.set(1.7, 2.1, 8.9);
+    mountain2.rotateY(-1.42);
+
+    const mountain3 = gltf.scene.clone();
+    mountain3.position.set(15.4, 1.6, 7.3);
+    mountain3.rotateY(-3.14);
+
+    scene.add(mountain1);
+    scene.add(mountain2);
+    scene.add(mountain3);
+
+    setupMountainGui(gui, [
+        { name: 'Mountain 1', object: mountain1 },
+        { name: 'Mountain 2', object: mountain2 },
+        { name: 'Mountain 3', object: mountain3 },
+    ]);
+});
+gltfLoader.load('/models/pine_tree/scene.gltf', (gltf) => {
+    const pine1 = gltf.scene.clone();
+    pine1.position.set(-2, 0, -1);
+    pine1.scale.setScalar(0.02);
+
+    const pine2 = gltf.scene.clone();
+    pine2.position.set(1, 0, 3);
+    pine2.scale.setScalar(0.02);
+
+    const pine3 = gltf.scene.clone();
+    pine3.position.set(3, 0, 1);
+    pine3.scale.setScalar(0.02);
+
+    const pine4 = gltf.scene.clone();
+    pine4.position.set(-1.5, 0, 3);
+    pine4.scale.setScalar(0.02);
+
+    const pine5 = gltf.scene.clone();
+    pine5.position.set(-2, 0, 1.7);
+    pine5.scale.setScalar(0.02);
+
+    const pine6 = gltf.scene.clone();
+    pine6.position.set(3, 0, 3);
+    pine6.scale.setScalar(0.02);
+
+    scene.add(pine1);
+    scene.add(pine2);
+    scene.add(pine3);
+    scene.add(pine4);
+    scene.add(pine5);
+    scene.add(pine6);
+
+    setupMountainGui(gui, [
+        { name: 'Pine 1', object: pine1 },
+        { name: 'Pine 2', object: pine2 },
+        { name: 'Pine 3', object: pine3 },
+        { name: 'Pine 4', object: pine4 },
+        { name: 'Pine 5', object: pine5 },
+        { name: 'Pine 6', object: pine6 },
+    ]);
+});
 const targetmesh = new THREE.Mesh(targetgeometry);
 scene.add(DIRECTIONAL_LIGHT);
 scene.add(DIRECTIONAL_LIGHT.target);
-// const cameraHelper = new THREE.CameraHelper(CAMERA);
-// scene.add(cameraHelper);
 
-// const sky = new Sky();
-// sky.scale.setScalar(450000);
+const sky = new Sky();
+sky.scale.setScalar(450000);
 
-// const lightDir = DIRECTIONAL_LIGHT.position.clone().normalize();
+const sunPosition = DIRECTIONAL_LIGHT.position.normalize(); //.multiplyScalar(450000);
+sky.material.uniforms.sunPosition.value.copy(sunPosition);
 
-// // The Sky shader expects the sun position as a direction vector,
-// // typically with a large magnitude
-// const sunPosition = lightDir.clone().multiplyScalar(450000);
-// sky.material.uniforms.sunPosition.value.copy(sunPosition);
+sky.material.uniforms.sunPosition.value = sunPosition;
 
-// sky.material.uniforms.sunPosition.value = sunPosition;
-
-// scene.add(sky);
+scene.add(sky);
 
 const waterSimulation = new WaterSimulation();
 const water = new Water();
 const caustics = new Caustics(water.geometry);
 const pool = new Pool();
-// const floor = new Floor();
+const floor = new Floor();
 scene.add(pool.mesh);
 scene.add(water.mesh);
-// scene.add(floor.mesh);
+scene.add(floor.mesh);
 
 const smoke1 = new Smoke();
 smoke1.mesh.position.z += 0.5;
@@ -177,6 +273,7 @@ const animate = (): void => {
     smoke2.updateUniforms(elapsedTime);
     RENDERER.render(scene, CAMERA);
     controls.update();
+    console.log(controls.getAzimuthalAngle());
     window.requestAnimationFrame(animate);
 };
 

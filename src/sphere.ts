@@ -80,8 +80,6 @@ export class Sphere {
 
         const y = SPHERE_CENTER.y;
         const radius = params.sphereRadius;
-
-        // % submerged
         const percentUnderwater = Math.max(0, Math.min(1, (radius - y) / (2 * radius)));
 
         const adjustedGravity = this.gravity.clone().multiplyScalar(deltaTime * (1 - 1.1 * percentUnderwater));
@@ -108,16 +106,16 @@ export class Sphere {
         const surfaceY = 0.0;
         if (bottomBefore > surfaceY && bottomAfter <= surfaceY) {
             // falling into the water
-            water.addDrop(SPHERE_CENTER.x, SPHERE_CENTER.z, 0.05, 0.5); // larger ripple
+            water.addDrop(SPHERE_CENTER.x, SPHERE_CENTER.z, radius, 0.5); // larger ripple
         }
 
         water.displaceVolume(prev, SPHERE_CENTER, radius);
 
         const minY = radius - 1;
-        if (SPHERE_CENTER.y < minY) {
+        if (SPHERE_CENTER.y <= minY) {
             SPHERE_CENTER.y = minY;
-            this.velocity.y = Math.abs(this.velocity.y) * 0.7;
             this.mesh.position.y = minY;
+            this.velocity.y = 0;
             this.mesh.material.uniforms.sphereCenter.value.y = minY;
         }
     }

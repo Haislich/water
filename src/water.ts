@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import waterVert from '../shaders/water/vertex.glsl';
 import waterFrag from '../shaders/water/fragment.glsl';
 import { DIRECTIONAL_LIGHT, params } from '../src/utils/simulationParameters';
-import { CUBE_TEXTURE, CAMERA, TILES } from './utils/constants';
+import { CUBE_TEXTURE, CAMERA, TILES, FLOOR_COLOR } from './utils/constants';
 import { SPHERE_CENTER } from './utils/globals';
 export class Water {
     public geometry;
@@ -27,7 +27,7 @@ export class Water {
 
                     light: { value: DIRECTIONAL_LIGHT.position },
                     water: { value: null },
-                    tiles: { value: TILES },
+                    tiles: { value: FLOOR_COLOR },
                     sky: { value: CUBE_TEXTURE },
                     causticTex: { value: null },
                     underwater: { value: false },

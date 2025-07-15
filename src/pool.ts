@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import poolVert from '../shaders/pool/vertex.glsl';
 import poolFrag from '../shaders/pool/fragment.glsl';
-import { TILES } from './utils/constants';
+import { FLOOR_COLOR, TILES } from './utils/constants';
 import { DIRECTIONAL_LIGHT, params } from './utils/simulationParameters';
 
 export class Pool {
@@ -22,7 +22,7 @@ export class Pool {
         this.material = new THREE.RawShaderMaterial({
             uniforms: {
                 light: { value: DIRECTIONAL_LIGHT.position },
-                tiles: { value: TILES },
+                tiles: { value: FLOOR_COLOR },
                 water: { value: null },
                 causticTex: { value: null },
                 wallLightAbsorption: new THREE.Uniform(params.wallLightAbsorption),

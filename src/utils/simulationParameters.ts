@@ -22,7 +22,7 @@ export const params = {
     // Misc
     wallLightAbsorption: 0.5,
 };
-export const DIRECTIONAL_LIGHT = new THREE.DirectionalLight(0xf2f3ae, 0.01);
+export const DIRECTIONAL_LIGHT = new THREE.DirectionalLight(0xf2f3ae, 0.5);
 export const updateLightDirection = (): void => {
     const theta = THREE.MathUtils.degToRad(params.azimuth); // horizontal angle around Y
     const phi = THREE.MathUtils.degToRad(-params.altitude); // fixed altitude => equator (XZ-plane)

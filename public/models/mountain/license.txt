@@ -1,0 +1,8 @@
+Model Information:
+* title:	Mountain
+* source:	https://sketchfab.com/3d-models/mountain-d9d25e9d0712430082b2d88bda20e0a1
+* author:	WeSVa (https://sketchfab.com/WSVideoCarta)
+
+Model License:
+* license type:	SKETCHFAB Standard (https://sketchfab.com/licenses)
+* requirements:	Under basic restrictions, use worldwide, on all types of media, commercially or not, and in all types of derivative works
