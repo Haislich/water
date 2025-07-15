@@ -105,7 +105,6 @@ scene.add(sphere.mesh);
 
 // Main rendering loop
 const clock = new THREE.Clock();
-const present = 0;
 const animate = (): void => {
     const deltaTime = clock.getDelta();
     const elapsedTime = clock.getElapsedTime();
@@ -119,7 +118,7 @@ const animate = (): void => {
     pool.updateUniforms(waterSimulation.texture, caustics.texture);
     sphere.updateUniforms(waterSimulation.texture, caustics.texture);
     sphere.updatePhysics(deltaTime, waterSimulation);
-    console.log(elapsedTime);
+    // console.log(elapsedTime);
     smoke1.mesh.material.uniforms['uTime'].value = elapsedTime;
     smoke2.mesh.material.uniforms['uTime'].value = elapsedTime;
     RENDERER.render(scene, CAMERA);

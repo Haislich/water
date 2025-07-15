@@ -10,7 +10,7 @@ void main() {
     smokeUv.y -= uTime * 0.03;
 
     float smoke = texture2D(uPerlinNoise, smokeUv).r;
-    smoke = smoothstep(0.35, 1., smoke);
+    smoke = smoothstep(0.2, 1., smoke);
     // Make the edges less aggressive
     smoke *= smoothstep(0.0, 0.2, vUv.x);
     smoke *= smoothstep(1.0, 0.8, vUv.x);
@@ -18,7 +18,7 @@ void main() {
     smoke *= smoothstep(0.0, 0.2, vUv.y);
     smoke *= smoothstep(1.0, 0.8, vUv.y);
 
-    smoke = 1.0;
+    // smoke = 1.0;
 
     gl_FragColor = vec4(1., 1., 1., smoke);
     #include <tonemapping_fragment>

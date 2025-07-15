@@ -13,7 +13,7 @@ export class Smoke {
                 side: THREE.DoubleSide,
                 transparent: true,
                 uniforms: {
-                    uTime: new THREE.Uniform(0),
+                    uTime: new THREE.Uniform(Math.random()),
                     uPerlinNoise: new THREE.Uniform(NOISE_TEXTURE),
                 },
                 // avoid the smoke occluding itself
