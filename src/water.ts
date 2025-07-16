@@ -4,6 +4,15 @@ import waterFrag from '../shaders/water/fragment.glsl';
 import { DIRECTIONAL_LIGHT, params } from '../src/utils/simulationParameters';
 import { CUBE_TEXTURE, CAMERA, TILES, FLOOR_COLOR } from './utils/constants';
 import { SPHERE_CENTER } from './utils/globals';
+
+const reflectionRenderTarget = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, {
+    minFilter: THREE.LinearFilter,
+    magFilter: THREE.LinearFilter,
+    format: THREE.RGBAFormat,
+});
+
+const reflectionCamera = CAMERA.clone();
+reflectionCamera.matrixAutoUpdate = false;
 export class Water {
     public geometry;
     public mesh;
@@ -18,12 +27,15 @@ export class Water {
             new THREE.ShaderMaterial({
                 uniforms: {
                     // float Uniforms, must be manually updated !!!!
+
                     wallLightAbsorption: new THREE.Uniform(params.wallLightAbsorption),
                     aoStrength: new THREE.Uniform(params.aoStrength),
                     aoFalloffPower: new THREE.Uniform(params.aoFalloffPower),
                     baseLightDiffuse: new THREE.Uniform(params.baseLightDiffuse),
                     causticProjectionScale: new THREE.Uniform(params.causticProjectionScale),
                     causticBoost: new THREE.Uniform(params.causticBoost),
+
+                    uReflectionTex: { value: reflectionRenderTarget.texture },
 
                     light: { value: DIRECTIONAL_LIGHT.position },
                     water: { value: null },

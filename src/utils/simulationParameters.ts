@@ -3,6 +3,9 @@ import GUI from 'lil-gui';
 
 export const params = {
     // Water
+    /**
+     * aoooo so della roma
+     */
     aoStrength: 0.9,
     aoFalloffPower: 3.0,
     baseLightDiffuse: 0.5,
@@ -11,34 +14,39 @@ export const params = {
     aboveWater: new THREE.Color(0.25, 1, 1.25),
     underWater: new THREE.Color(0.4, 0.9, 1.0),
 
+    // Caustics
+    causticIntensityScale: 0.2,
+    shadowBaseSoftness: 0.05,
+    shadowDistanceScale: 0.025,
+    shadowDistanceMixScale: 2.0,
+    rimShadowSteepness: 200,
+    rimShadowSlopeScale: 10,
+    rimShadowVerticalOffset: 0.166,
+
     dropRadius: 0.03,
     dropStrength: 0.04,
     sphereRadius: 0.3,
 
     // Light
     azimuth: 45,
-    altitude: 40, // inizialmente e' sparata giu
+    altitude: 40,
 
     // Misc
     wallLightAbsorption: 0.5,
 };
-export const DIRECTIONAL_LIGHT = new THREE.DirectionalLight(0xf2f3ae, 0.5);
+export const DIRECTIONAL_LIGHT = new THREE.DirectionalLight(0xf2f3ae, 0.8);
 export const updateLightDirection = (): void => {
-    const theta = THREE.MathUtils.degToRad(params.azimuth); // horizontal angle around Y
-    const phi = THREE.MathUtils.degToRad(-params.altitude); // fixed altitude => equator (XZ-plane)
-    const r = 3; // radius
+    const theta = THREE.MathUtils.degToRad(params.azimuth);
+    const phi = THREE.MathUtils.degToRad(-params.altitude);
+    const radius = 3;
 
     // Point on the circle in XZ plane
-    const x = Math.cos(phi) * Math.cos(theta); // becomes cos(theta)
-    const y = Math.sin(phi); // becomes 0
-    const z = Math.cos(phi) * Math.sin(theta); // becomes sin(theta)
+    const x = Math.cos(phi) * Math.cos(theta);
+    const y = Math.sin(phi);
+    const z = Math.cos(phi) * Math.sin(theta);
 
     const dir = new THREE.Vector3(x, y, z).normalize();
-
-    // Light is placed at point on the circumference, always pointing inward to origin
-    DIRECTIONAL_LIGHT.position.copy(dir.clone().multiplyScalar(-r));
-    // DIRECTIONAL_LIGHT.target.position.set(0, 0, 0);
-    // DIRECTIONAL_LIGHT.target.updateMatrixWorld();
+    DIRECTIONAL_LIGHT.position.copy(dir.clone().multiplyScalar(-radius));
     DIRECTIONAL_LIGHT.lookAt(0, 0, 0);
 };
 
@@ -46,15 +54,25 @@ updateLightDirection();
 
 export const setupSimulationGUI = (gui: GUI): void => {
     const folder = gui.addFolder('Simulation Params');
-    const waterFolder = gui.addFolder('Water Heightfield');
-    waterFolder.add(params, 'aoStrength', 0.2, 1.2).step(0.1);
-    waterFolder.add(params, 'aoFalloffPower', 1.5, 6).step(0.5);
-    waterFolder.add(params, 'baseLightDiffuse', 0.3, 1.0).step(0.1);
-    waterFolder.add(params, 'causticProjectionScale', 0.6, 1.0).step(0.1);
-    waterFolder.add(params, 'causticBoost', 1, 6.0).step(1);
-    waterFolder.addColor(params, 'aboveWater');
-    waterFolder.addColor(params, 'underWater');
-    waterFolder.open();
+
+    const waterSurfaceFolder = gui.addFolder('Water Surface');
+    waterSurfaceFolder.add(params, 'aoStrength', 0.2, 1.2).step(0.1);
+    waterSurfaceFolder.add(params, 'aoFalloffPower', 1.5, 6).step(0.5);
+    waterSurfaceFolder.add(params, 'baseLightDiffuse', 0.3, 1.0).step(0.1);
+    waterSurfaceFolder.add(params, 'causticProjectionScale', 0.6, 1.0).step(0.1);
+    waterSurfaceFolder.add(params, 'causticBoost', 1, 6.0).step(1);
+    waterSurfaceFolder.addColor(params, 'aboveWater');
+    waterSurfaceFolder.addColor(params, 'underWater');
+    // waterFolder.open();
+
+    const causticsFolder = gui.addFolder('Caustics');
+    causticsFolder.add(params, 'causticIntensityScale', 0, 2).step(0.05);
+    causticsFolder.add(params, 'shadowBaseSoftness', 0, 0.2).step(0.001);
+    causticsFolder.add(params, 'shadowDistanceScale', 0, 0.1).step(0.001);
+    causticsFolder.add(params, 'shadowDistanceMixScale', 0, 5).step(0.5);
+    causticsFolder.add(params, 'rimShadowSteepness', 50, 500).step(10);
+    causticsFolder.add(params, 'rimShadowSlopeScale', 1, 20).step(1);
+    causticsFolder.add(params, 'rimShadowVerticalOffset', 0, 1).step(0.01);
 
     folder.add(params, 'dropRadius', 0.01, 0.1).step(0.001);
     folder.add(params, 'dropStrength', -0.1, 0.1).step(0.001);
