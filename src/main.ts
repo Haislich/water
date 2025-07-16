@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
-import { reflectionCamera, reflectionRenderTarget, Water } from './water';
+import { Water } from './water';
 import { Caustics } from './caustics';
 import { WaterSimulation } from './waterSimulation';
 import { Pool } from './pool';
@@ -129,32 +129,18 @@ setupDebugGui(gui, scene);
 // `#include <utils>` direcctive and utilize the contants and functions from there.
 (THREE.ShaderChunk as Record<string, string>)['utils'] = utils;
 
-// Create mouse Controls
 const controls = new OrbitControls(CAMERA, CANVAS);
-// controls.rotateSpeed = 2.5;
-// controls.zoomSpeed = 1.2;
-// controls.panSpeed = 0.9;
-// controls.maxDistance = 5;
-// controls.maxAzimuthAngle = Math.PI / 6 + Math.PI;
-// controls.minAzimuthAngle = -Math.PI / 4 + Math.PI;
-
-// console.log(controls);
-
-// Ray caster
 const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector2();
-const targetgeometry = new THREE.PlaneGeometry(2, 2);
-const position = targetgeometry.attributes.position;
 raycaster.layers.enable(0); // default scene
 raycaster.layers.enable(1); // sphere
+const mouse = new THREE.Vector2();
+const targetgeometry = new THREE.PlaneGeometry(2, 2);
+const targetmesh = new THREE.Mesh(targetgeometry, new THREE.MeshStandardMaterial({ wireframe: true }));
+targetmesh.rotateX(-Math.PI / 2);
+scene.add(DIRECTIONAL_LIGHT);
+scene.add(DIRECTIONAL_LIGHT.target);
 
-for (let i = 0; i < position.count; i++) {
-    const y = position.getY(i);
-    position.setY(i, 0); // y = 0
-    position.setZ(i, -y); // z = -originalY
-}
-
-position.needsUpdate = true;
+// scene.add(targetmesh);
 
 const gltfLoader = new GLTFLoader();
 
@@ -222,18 +208,10 @@ gltfLoader.load('/models/pine_tree/scene.gltf', (gltf) => {
         { name: 'Pine 6', object: pine6 },
     ]);
 });
-const targetmesh = new THREE.Mesh(targetgeometry);
-scene.add(DIRECTIONAL_LIGHT);
-scene.add(DIRECTIONAL_LIGHT.target);
 
 const sky = new Sky();
 sky.scale.setScalar(450000);
-
-// const sunPosition = DIRECTIONAL_LIGHT.position.normalize(); //.multiplyScalar(450000);
-// sky.material.uniforms.sunPosition.value.copy(sunPosition);
-
 sky.material.uniforms.sunPosition.value = DIRECTIONAL_LIGHT.position;
-
 scene.add(sky);
 
 const waterSimulation = new WaterSimulation();
@@ -256,55 +234,26 @@ smoke2.mesh.position.z -= 0.5;
 const sphere = new Sphere();
 scene.add(sphere.mesh);
 
-function updateReflectionCamera(main: THREE.Camera, mirror: THREE.Camera, waterY: number = 0) {
-    mirror.position.copy(main.position);
-    mirror.position.y = waterY - (main.position.y - waterY);
-
-    const target = new THREE.Vector3();
-    main.getWorldDirection(target);
-    target.y = -target.y;
-
-    mirror.up.set(0, 1, 0);
-    mirror.lookAt(new THREE.Vector3().copy(mirror.position).add(target));
-    mirror.projectionMatrix.copy(main.projectionMatrix);
-    mirror.updateMatrixWorld(true);
-    // console.log(mirror.position, SPHERE_CENTER);
-}
-
 // Main rendering loop
 const clock = new THREE.Clock();
 const animate = (): void => {
     const deltaTime = clock.getDelta();
     const elapsedTime = clock.getElapsedTime();
 
-    // STEP 1: update orbit controls FIRST
-    controls.update(); // <-- must come BEFORE updateReflectionCamera()
+    controls.update();
 
-    // STEP 2: update simulation and uniforms
     waterSimulation.stepSimulation();
     waterSimulation.updateNormals();
     caustics.updateUniforms(waterSimulation.texture);
     water.updateUniforms(waterSimulation.texture, caustics.texture);
     pool.updateUniforms(waterSimulation.texture, caustics.texture);
     sphere.updateUniforms(waterSimulation.texture, caustics.texture);
-    // sphere.updatePhysics(deltaTime, waterSimulation);
+    sphere.updatePhysics(deltaTime, waterSimulation);
     smoke1.updateUniforms(elapsedTime);
     smoke2.updateUniforms(elapsedTime);
 
-    // STEP 3: update reflection camera using the fresh orbit-controlled CAMERA
-    updateReflectionCamera(CAMERA, reflectionCamera);
-
-    // STEP 4: render reflection scene
-    water.mesh.visible = false;
-    RENDERER.setRenderTarget(reflectionRenderTarget);
-    RENDERER.render(scene, reflectionCamera);
-    RENDERER.setRenderTarget(null);
-    water.mesh.visible = true;
-
-    // STEP 5: render main scene
     RENDERER.render(scene, CAMERA);
-
-    window.requestAnimationFrame(animate);
+    requestAnimationFrame(animate);
 };
 
 let isDragging = false;
@@ -365,14 +314,14 @@ CANVAS.addEventListener('mousemove', (event: MouseEvent): void => {
     } else {
         // Regular water drop logic when not dragging
         const intersects = raycaster.intersectObject(targetmesh);
-        // for (const intersect of intersects) {
-        //     waterSimulation.addDrop(intersect.point.x, intersect.point.z, 0.01, 0.04);
-        // }
+        for (const intersect of intersects) {
+            waterSimulation.addDrop(intersect.point.x, intersect.point.z, 0.01, 0.04);
+        }
     }
 });
 
-// for (let i = 0; i < 20; i++) {
-//     waterSimulation.addDrop(Math.random() * 2 - 1, Math.random() * 2 - 1, 0.03, i & 1 ? 0.02 : -0.02);
-// }
+for (let i = 0; i < 20; i++) {
+    waterSimulation.addDrop(Math.random() * 2 - 1, Math.random() * 2 - 1, 0.03, i & 1 ? 0.02 : -0.02);
+}
 
 animate();

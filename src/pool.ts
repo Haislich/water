@@ -35,6 +35,7 @@ export class Pool {
         this.material.side = THREE.FrontSide;
 
         this.mesh = new THREE.Mesh(this.geometry, this.material);
+        this.mesh.layers.set(1);
     }
     updateUniforms(waterTexture: THREE.Texture, causticsTexture: THREE.Texture): void {
         this.material.uniforms['water'].value = waterTexture;

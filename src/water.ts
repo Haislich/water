@@ -2,18 +2,9 @@ import * as THREE from 'three';
 import waterVert from '../shaders/water/vertex.glsl';
 import waterFrag from '../shaders/water/fragment.glsl';
 import { DIRECTIONAL_LIGHT, params } from '../src/utils/simulationParameters';
-import { CUBE_TEXTURE, CAMERA, TILES, FLOOR_COLOR } from './utils/constants';
+import { CUBE_TEXTURE, CAMERA, FLOOR_COLOR } from './utils/constants';
 import { SPHERE_CENTER } from './utils/globals';
 
-export const reflectionRenderTarget = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, {
-    minFilter: THREE.LinearFilter,
-    magFilter: THREE.LinearFilter,
-    format: THREE.RGBAFormat,
-});
-
-export const reflectionCamera = CAMERA.clone();
-reflectionCamera.layers.set(0); // Only sees default layer (everything except the ball)
-reflectionCamera.matrixAutoUpdate = false;
 export class Water {
     public geometry;
     public mesh;
@@ -36,7 +27,7 @@ export class Water {
                     causticProjectionScale: new THREE.Uniform(params.causticProjectionScale),
                     causticBoost: new THREE.Uniform(params.causticBoost),
 
-                    uReflectionTex: { value: reflectionRenderTarget.texture },
+                    uReflectionTex: { value: CUBE_TEXTURE },
                     uReflectionMatrix: { value: new THREE.Matrix4() },
 
                     light: { value: DIRECTIONAL_LIGHT.position },
@@ -67,8 +58,8 @@ export class Water {
         this.mesh.material.uniforms['causticBoost'].value = params.causticBoost;
         this.mesh.material.uniforms['light'].value = DIRECTIONAL_LIGHT.position;
 
-        const vpMatrix = new THREE.Matrix4().multiplyMatrices(reflectionCamera.projectionMatrix, reflectionCamera.matrixWorldInverse);
-        this.mesh.material.uniforms.uReflectionMatrix.value.copy(vpMatrix);
+        // const vpMatrix = new THREE.Matrix4().multiplyMatrices(reflectionCamera.projectionMatrix, reflectionCamera.matrixWorldInverse);
+        // this.mesh.material.uniforms.uReflectionMatrix.value.copy(vpMatrix);
 
         const eyePosition = CAMERA.position;
         const isUnderwater = eyePosition.y < 0;

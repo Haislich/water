@@ -49,9 +49,7 @@ export const updateLightDirection = (): void => {
     DIRECTIONAL_LIGHT.position.copy(dir.clone().multiplyScalar(-radius));
     DIRECTIONAL_LIGHT.lookAt(0, 0, 0);
 };
-console.log(DIRECTIONAL_LIGHT.position);
 updateLightDirection();
-console.log(DIRECTIONAL_LIGHT.position);
 
 export const setupSimulationGUI = (gui: GUI): void => {
     const folder = gui.addFolder('Simulation Params');

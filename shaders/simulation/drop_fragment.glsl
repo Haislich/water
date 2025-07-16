@@ -8,7 +8,6 @@ uniform float radius;
 uniform float strength;
 varying vec2 coord;
 
-
 void main() {
   /* Get vertex info */
   vec4 info = texture2D(texture, coord);

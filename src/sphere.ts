@@ -109,9 +109,9 @@ export class Sphere {
 
         // Trigger a drop if it entered water this frame
         const surfaceY = 0.0;
-        if (bottomBefore > surfaceY && bottomAfter <= surfaceY) {
+        if ((bottomBefore > surfaceY && bottomAfter <= surfaceY) || (bottomBefore <= surfaceY && bottomAfter > surfaceY)) {
             // falling into the water
-            water.addDrop(SPHERE_CENTER.x, SPHERE_CENTER.z, radius, 0.05); // larger ripple
+            water.addDrop(SPHERE_CENTER.x, SPHERE_CENTER.z, radius * 2, 0.01); // larger ripple
         }
 
         water.displaceVolume(prev, SPHERE_CENTER, radius);

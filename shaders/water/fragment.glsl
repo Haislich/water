@@ -51,9 +51,9 @@ vec3 getSurfaceRayColor(vec3 origin, vec3 ray, vec3 waterColor) {
       if(hit.y < 2.0 / 12.0) {
         color = getWallColor(hit);
       } else {
-        //color = textureCube(sky, ray).rgb;
-        vec2 screenUV = 0.5 * (ray.xz / -ray.y) + 0.5;
-        color = texture2D(uReflectionTex, screenUV).rgb;
+        color = textureCube(sky, ray).rgb;
+        // vec2 screenUV = 0.5 * (ray.xz / -ray.y) + 0.5;
+        // color = texture2D(uReflectionTex, screenUV).rgb;
 
         // float sunSpec = pow(max(0.0, dot(light, ray)), 300.0);
         float sunSpec = pow(clamp(dot(light, ray), 0.0, 1.0), 300.0);
