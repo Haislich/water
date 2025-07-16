@@ -11,7 +11,7 @@ export const params = {
     baseLightDiffuse: 0.5,
     causticProjectionScale: 0.75,
     causticBoost: 4.0,
-    aboveWater: new THREE.Color(0.25, 1, 1.25),
+    aboveWater: new THREE.Color(0xc9f3c9),
     underWater: new THREE.Color(0.4, 0.9, 1.0),
 
     // Caustics
@@ -28,7 +28,7 @@ export const params = {
     sphereRadius: 0.3,
 
     // Light
-    azimuth: 45,
+    azimuth: 50,
     altitude: 40,
 
     // Misc
@@ -49,8 +49,9 @@ export const updateLightDirection = (): void => {
     DIRECTIONAL_LIGHT.position.copy(dir.clone().multiplyScalar(-radius));
     DIRECTIONAL_LIGHT.lookAt(0, 0, 0);
 };
-
+console.log(DIRECTIONAL_LIGHT.position);
 updateLightDirection();
+console.log(DIRECTIONAL_LIGHT.position);
 
 export const setupSimulationGUI = (gui: GUI): void => {
     const folder = gui.addFolder('Simulation Params');

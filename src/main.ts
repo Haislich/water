@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
-import { Water } from './water';
+import { reflectionCamera, reflectionRenderTarget, Water } from './water';
 import { Caustics } from './caustics';
 import { WaterSimulation } from './waterSimulation';
 import { Pool } from './pool';
@@ -131,20 +131,22 @@ setupDebugGui(gui, scene);
 
 // Create mouse Controls
 const controls = new OrbitControls(CAMERA, CANVAS);
-controls.rotateSpeed = 2.5;
-controls.zoomSpeed = 1.2;
-controls.panSpeed = 0.9;
-controls.maxDistance = 5;
-controls.maxAzimuthAngle = Math.PI / 6 + Math.PI;
-controls.minAzimuthAngle = -Math.PI / 4 + Math.PI;
+// controls.rotateSpeed = 2.5;
+// controls.zoomSpeed = 1.2;
+// controls.panSpeed = 0.9;
+// controls.maxDistance = 5;
+// controls.maxAzimuthAngle = Math.PI / 6 + Math.PI;
+// controls.minAzimuthAngle = -Math.PI / 4 + Math.PI;
 
-console.log(controls);
+// console.log(controls);
 
 // Ray caster
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 const targetgeometry = new THREE.PlaneGeometry(2, 2);
 const position = targetgeometry.attributes.position;
+raycaster.layers.enable(0); // default scene
+raycaster.layers.enable(1); // sphere
 
 for (let i = 0; i < position.count; i++) {
     const y = position.getY(i);
@@ -154,72 +156,72 @@ for (let i = 0; i < position.count; i++) {
 
 position.needsUpdate = true;
 
-// const gltfLoader = new GLTFLoader();
+const gltfLoader = new GLTFLoader();
 
-// gltfLoader.load('/models/mountain/scene.gltf', (gltf) => {
-//     const mountain1 = gltf.scene.clone();
-//     mountain1.position.set(-16.1, 1.6, 5.7);
-//     mountain1.rotateY(0.6);
+gltfLoader.load('/models/mountain/scene.gltf', (gltf) => {
+    const mountain1 = gltf.scene.clone();
+    mountain1.position.set(-16.1, 1.6, 5.7);
+    mountain1.rotateY(0.6);
 
-//     const mountain2 = gltf.scene.clone();
-//     mountain2.position.set(1.7, 2.1, 8.9);
-//     mountain2.rotateY(-1.42);
+    const mountain2 = gltf.scene.clone();
+    mountain2.position.set(1.7, 2.1, 8.9);
+    mountain2.rotateY(-1.42);
 
-//     const mountain3 = gltf.scene.clone();
-//     mountain3.position.set(15.4, 1.6, 7.3);
-//     mountain3.rotateY(-3.14);
+    const mountain3 = gltf.scene.clone();
+    mountain3.position.set(15.4, 1.6, 7.3);
+    mountain3.rotateY(-3.14);
 
-//     scene.add(mountain1);
-//     scene.add(mountain2);
-//     scene.add(mountain3);
+    scene.add(mountain1);
+    scene.add(mountain2);
+    scene.add(mountain3);
 
-//     setupMountainGui(gui, [
-//         { name: 'Mountain 1', object: mountain1 },
-//         { name: 'Mountain 2', object: mountain2 },
-//         { name: 'Mountain 3', object: mountain3 },
-//     ]);
-// });
-// gltfLoader.load('/models/pine_tree/scene.gltf', (gltf) => {
-//     const pine1 = gltf.scene.clone();
-//     pine1.position.set(-2, 0, -1);
-//     pine1.scale.setScalar(0.02);
+    setupMountainGui(gui, [
+        { name: 'Mountain 1', object: mountain1 },
+        { name: 'Mountain 2', object: mountain2 },
+        { name: 'Mountain 3', object: mountain3 },
+    ]);
+});
+gltfLoader.load('/models/pine_tree/scene.gltf', (gltf) => {
+    const pine1 = gltf.scene.clone();
+    pine1.position.set(-2, 0, -1);
+    pine1.scale.setScalar(0.02);
 
-//     const pine2 = gltf.scene.clone();
-//     pine2.position.set(1, 0, 3);
-//     pine2.scale.setScalar(0.02);
+    const pine2 = gltf.scene.clone();
+    pine2.position.set(1, 0, 3);
+    pine2.scale.setScalar(0.02);
 
-//     const pine3 = gltf.scene.clone();
-//     pine3.position.set(3, 0, 1);
-//     pine3.scale.setScalar(0.02);
+    const pine3 = gltf.scene.clone();
+    pine3.position.set(3, 0, 1);
+    pine3.scale.setScalar(0.02);
 
-//     const pine4 = gltf.scene.clone();
-//     pine4.position.set(-1.5, 0, 3);
-//     pine4.scale.setScalar(0.02);
+    const pine4 = gltf.scene.clone();
+    pine4.position.set(-1.5, 0, 3);
+    pine4.scale.setScalar(0.02);
 
-//     const pine5 = gltf.scene.clone();
-//     pine5.position.set(-2, 0, 1.7);
-//     pine5.scale.setScalar(0.02);
+    const pine5 = gltf.scene.clone();
+    pine5.position.set(-2, 0, 1.7);
+    pine5.scale.setScalar(0.02);
 
-//     const pine6 = gltf.scene.clone();
-//     pine6.position.set(3, 0, 3);
-//     pine6.scale.setScalar(0.02);
+    const pine6 = gltf.scene.clone();
+    pine6.position.set(3, 0, 3);
+    pine6.scale.setScalar(0.02);
 
-//     scene.add(pine1);
-//     scene.add(pine2);
-//     scene.add(pine3);
-//     scene.add(pine4);
-//     scene.add(pine5);
-//     scene.add(pine6);
+    scene.add(pine1);
+    scene.add(pine2);
+    scene.add(pine3);
+    scene.add(pine4);
+    scene.add(pine5);
+    scene.add(pine6);
 
-//     setupMountainGui(gui, [
-//         { name: 'Pine 1', object: pine1 },
-//         { name: 'Pine 2', object: pine2 },
-//         { name: 'Pine 3', object: pine3 },
-//         { name: 'Pine 4', object: pine4 },
-//         { name: 'Pine 5', object: pine5 },
-//         { name: 'Pine 6', object: pine6 },
-//     ]);
-// });
+    setupMountainGui(gui, [
+        { name: 'Pine 1', object: pine1 },
+        { name: 'Pine 2', object: pine2 },
+        { name: 'Pine 3', object: pine3 },
+        { name: 'Pine 4', object: pine4 },
+        { name: 'Pine 5', object: pine5 },
+        { name: 'Pine 6', object: pine6 },
+    ]);
+});
 const targetmesh = new THREE.Mesh(targetgeometry);
 scene.add(DIRECTIONAL_LIGHT);
 scene.add(DIRECTIONAL_LIGHT.target);
@@ -227,10 +229,10 @@ scene.add(DIRECTIONAL_LIGHT.target);
 const sky = new Sky();
 sky.scale.setScalar(450000);
 
-const sunPosition = DIRECTIONAL_LIGHT.position.normalize(); //.multiplyScalar(450000);
-sky.material.uniforms.sunPosition.value.copy(sunPosition);
+// const sunPosition = DIRECTIONAL_LIGHT.position.normalize(); //.multiplyScalar(450000);
+// sky.material.uniforms.sunPosition.value.copy(sunPosition);
 
-sky.material.uniforms.sunPosition.value = sunPosition;
+sky.material.uniforms.sunPosition.value = DIRECTIONAL_LIGHT.position;
 
 scene.add(sky);
 
@@ -254,25 +256,54 @@ smoke2.mesh.position.z -= 0.5;
 const sphere = new Sphere();
 scene.add(sphere.mesh);
 
+function updateReflectionCamera(main: THREE.Camera, mirror: THREE.Camera, waterY: number = 0) {
+    mirror.position.copy(main.position);
+    mirror.position.y = waterY - (main.position.y - waterY);
+
+    const target = new THREE.Vector3();
+    main.getWorldDirection(target);
+    target.y = -target.y;
+
+    mirror.up.set(0, 1, 0);
+    mirror.lookAt(new THREE.Vector3().copy(mirror.position).add(target));
+    mirror.projectionMatrix.copy(main.projectionMatrix);
+    mirror.updateMatrixWorld(true);
+    // console.log(mirror.position, SPHERE_CENTER);
+}
+
 // Main rendering loop
 const clock = new THREE.Clock();
 const animate = (): void => {
     const deltaTime = clock.getDelta();
     const elapsedTime = clock.getElapsedTime();
 
+    // STEP 1: update orbit controls FIRST
+    controls.update(); // <-- must come BEFORE updateReflectionCamera()
+
+    // STEP 2: update simulation and uniforms
     waterSimulation.stepSimulation();
     waterSimulation.updateNormals();
-
     caustics.updateUniforms(waterSimulation.texture);
-
     water.updateUniforms(waterSimulation.texture, caustics.texture);
     pool.updateUniforms(waterSimulation.texture, caustics.texture);
     sphere.updateUniforms(waterSimulation.texture, caustics.texture);
-    sphere.updatePhysics(deltaTime, waterSimulation);
+    // sphere.updatePhysics(deltaTime, waterSimulation);
     smoke1.updateUniforms(elapsedTime);
     smoke2.updateUniforms(elapsedTime);
+
+    // STEP 3: update reflection camera using the fresh orbit-controlled CAMERA
+    updateReflectionCamera(CAMERA, reflectionCamera);
+
+    // STEP 4: render reflection scene
+    water.mesh.visible = false;
+    RENDERER.setRenderTarget(reflectionRenderTarget);
+    RENDERER.render(scene, reflectionCamera);
+    RENDERER.setRenderTarget(null);
+    water.mesh.visible = true;
+
+    // STEP 5: render main scene
     RENDERER.render(scene, CAMERA);
-    controls.update();
+
     window.requestAnimationFrame(animate);
 };
 
@@ -334,9 +365,9 @@ CANVAS.addEventListener('mousemove', (event: MouseEvent): void => {
     } else {
         // Regular water drop logic when not dragging
         const intersects = raycaster.intersectObject(targetmesh);
-        for (const intersect of intersects) {
-            waterSimulation.addDrop(intersect.point.x, intersect.point.z, 0.01, 0.04);
-        }
+        // for (const intersect of intersects) {
+        //     waterSimulation.addDrop(intersect.point.x, intersect.point.z, 0.01, 0.04);
+        // }
     }
 });
 

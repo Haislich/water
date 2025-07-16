@@ -40,5 +40,6 @@ export class Pool {
         this.material.uniforms['water'].value = waterTexture;
         this.material.uniforms['causticTex'].value = causticsTexture;
         this.material.uniforms['wallLightAbsorption'].value = params.wallLightAbsorption;
+        this.material.uniforms['light'].value = DIRECTIONAL_LIGHT.position;
     }
 }

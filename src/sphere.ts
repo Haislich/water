@@ -4,6 +4,9 @@ import sphereFrag from '../shaders/sphere/fragment.glsl';
 import { SPHERE_CENTER } from './utils/globals';
 import { params, DIRECTIONAL_LIGHT } from './utils/simulationParameters';
 import type { WaterSimulation } from './waterSimulation';
+import { color } from 'three/examples/jsm/nodes/Nodes.js';
+
+const BALL_LAYER = 1;
 
 export class Sphere {
     public geometry: THREE.SphereGeometry;
@@ -21,6 +24,7 @@ export class Sphere {
         const shaderMaterial = new THREE.ShaderMaterial({
             vertexShader: sphereVert,
             fragmentShader: sphereFrag,
+            // vertexColors
             uniforms: {
                 wallLightAbsorption: new THREE.Uniform(params.wallLightAbsorption),
                 aoStrength: new THREE.Uniform(params.aoStrength),
@@ -39,6 +43,7 @@ export class Sphere {
         });
 
         this.mesh = new THREE.Mesh(this.geometry, shaderMaterial);
+        this.mesh.layers.set(BALL_LAYER);
         this.updatePosition(SPHERE_CENTER);
     }
 
@@ -106,7 +111,7 @@ export class Sphere {
         const surfaceY = 0.0;
         if (bottomBefore > surfaceY && bottomAfter <= surfaceY) {
             // falling into the water
-            water.addDrop(SPHERE_CENTER.x, SPHERE_CENTER.z, radius, 0.5); // larger ripple
+            water.addDrop(SPHERE_CENTER.x, SPHERE_CENTER.z, radius, 0.05); // larger ripple
         }
 
         water.displaceVolume(prev, SPHERE_CENTER, radius);

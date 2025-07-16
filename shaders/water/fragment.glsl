@@ -10,6 +10,8 @@ uniform vec3 eye;
 
 uniform vec3 abovewaterColor;
 uniform vec3 underwaterColor;
+uniform sampler2D uReflectionTex;
+uniform mat4 uReflectionMatrix;
 
 varying vec3 pos;
 
@@ -49,9 +51,13 @@ vec3 getSurfaceRayColor(vec3 origin, vec3 ray, vec3 waterColor) {
       if(hit.y < 2.0 / 12.0) {
         color = getWallColor(hit);
       } else {
-        color = textureCube(sky, ray).rgb;
+        //color = textureCube(sky, ray).rgb;
+        vec2 screenUV = 0.5 * (ray.xz / -ray.y) + 0.5;
+        color = texture2D(uReflectionTex, screenUV).rgb;
 
-        float sunSpec = pow(max(0.0, dot(light, ray)), 300.0);
+        // float sunSpec = pow(max(0.0, dot(light, ray)), 300.0);
+        float sunSpec = pow(clamp(dot(light, ray), 0.0, 1.0), 300.0);
+
         //color += sunSpec * vec3(10.0, 8.0, 6.0);
         sunSpec * vec3(2.0, 1.5, 1.0);
       }
@@ -72,8 +78,14 @@ void main() {
     info = texture2D(water, coord);
   }
 
+  // vec2 slope = info.ba;
+  // vec3 normal = vec3(slope.x, sqrt(1.0 - dot(slope, slope)), slope.y);
   vec2 slope = info.ba;
-  vec3 normal = vec3(slope.x, sqrt(1.0 - dot(slope, slope)), slope.y);
+  float slopeLen2 = dot(slope, slope);
+  slope = slope * inversesqrt(max(1.0, slopeLen2)); // keep it unit-length max
+
+  float ny = sqrt(max(1e-5, 1.0 - slopeLen2)); // avoid NaN from negative sqrt
+  vec3 normal = vec3(slope.x, ny, slope.y);
 
   vec3 incomingRay = normalize(pos - eye);
 
@@ -83,7 +95,9 @@ void main() {
     vec3 reflectedRay = reflect(incomingRay, normal);
     vec3 refractedRay = refract(incomingRay, normal, IOR_WATER / IOR_AIR);
 
-    float fresnel = mix(0.5, 1.0, pow(1.0 - dot(normal, -incomingRay), 3.0));
+    // float fresnel = mix(0.5, 1.0, pow(1.0 - dot(normal, -incomingRay), 3.0));//
+    float ndoti = clamp(dot(normal, -incomingRay), 0.0, 1.0);
+    float fresnel = mix(0.25, 1.0, pow(1.0 - ndoti, 3.0));
 
     vec3 reflectedColor = getSurfaceRayColor(pos, reflectedRay, underwaterColor);
     vec3 refractedColor = getSurfaceRayColor(pos, refractedRay, vec3(1.0)) * vec3(0.8, 1.0, 1.1);

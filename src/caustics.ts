@@ -52,6 +52,7 @@ export class Caustics {
         this.causticMesh.material.uniforms['rimShadowSteepness'].value = params.rimShadowSteepness;
         this.causticMesh.material.uniforms['rimShadowSlopeScale'].value = params.rimShadowSlopeScale;
         this.causticMesh.material.uniforms['rimShadowVerticalOffset'].value = params.rimShadowVerticalOffset;
+        this.causticMesh.material.uniforms['light'].value = DIRECTIONAL_LIGHT.position;
 
         // Bind the current texture
         RENDERER.setRenderTarget(this._renderTarget);
