@@ -5,6 +5,15 @@ import { DIRECTIONAL_LIGHT, params } from '../src/utils/simulationParameters';
 import { CUBE_TEXTURE, CAMERA, FLOOR_COLOR } from './utils/constants';
 import { SPHERE_CENTER } from './utils/globals';
 
+export const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(512, {
+    format: THREE.RGBAFormat,
+    generateMipmaps: true,
+    minFilter: THREE.LinearMipmapLinearFilter,
+    colorSpace: THREE.SRGBColorSpace,
+});
+
+export const cubeCamera = new THREE.CubeCamera(0.1, 1000, cubeRenderTarget);
+
 export class Water {
     public geometry;
     public mesh;
@@ -22,13 +31,15 @@ export class Water {
                     causticProjectionScale: new THREE.Uniform(params.causticProjectionScale),
                     causticBoost: new THREE.Uniform(params.causticBoost),
 
-                    uReflectionTex: { value: CUBE_TEXTURE },
+                    // uReflectionTex: { value: CUBE_TEXTURE },
+                    uReflectionTex: { value: cubeRenderTarget.texture },
+
                     uReflectionMatrix: { value: new THREE.Matrix4() },
 
                     light: { value: DIRECTIONAL_LIGHT.position },
                     water: { value: null },
                     tiles: { value: FLOOR_COLOR },
-                    sky: { value: CUBE_TEXTURE },
+                    sky: { value: cubeRenderTarget.texture },
                     causticTex: { value: null },
                     underwater: { value: false },
                     eye: { value: null },
@@ -52,6 +63,7 @@ export class Water {
         this.mesh.material.uniforms['causticProjectionScale'].value = params.causticProjectionScale;
         this.mesh.material.uniforms['causticBoost'].value = params.causticBoost;
         this.mesh.material.uniforms['light'].value = DIRECTIONAL_LIGHT.position;
+        this.mesh.material.uniforms.uReflectionTex.value = cubeRenderTarget.texture;
 
         const eyePosition = CAMERA.position;
         const isUnderwater = eyePosition.y < 0;

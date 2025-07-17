@@ -37,6 +37,7 @@ void main() {
   vec2 t = intersectCube(newPos, -refractedLight, vec3(-1.0, -poolHeight, -1.0), vec3(1.0, 2.0, 1.0));
   float rimShadow = 1.0 / (1.0 + exp(-rimShadowSteepness / (1.0 + rimShadowSlopeScale * (t.y - t.x)) * (newPos.y - refractedLight.y * t.y - rimShadowVerticalOffset)));
 
+    // Final color
   gl_FragColor = vec4(intensity, shadow, 0.0, 1.0);
   gl_FragColor.r *= rimShadow;
 }
