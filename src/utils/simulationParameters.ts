@@ -38,7 +38,7 @@ export const DIRECTIONAL_LIGHT = new THREE.DirectionalLight(0xf2f3ae, 0.8);
 export const updateLightDirection = (): void => {
     const theta = THREE.MathUtils.degToRad(params.azimuth);
     const phi = THREE.MathUtils.degToRad(-params.altitude);
-    const radius = 1;
+    const radius = 3;
 
     // Point on the circle in XZ plane
     const x = Math.cos(phi) * Math.cos(theta);

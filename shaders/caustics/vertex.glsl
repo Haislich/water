@@ -25,7 +25,7 @@ void main() {
   /* project the vertices along the refracted vertex ray */
   vec3 refractedLight = refract(-light, vec3(0.0, 1.0, 0.0), IOR_AIR / IOR_WATER);
   ray = refract(-light, normal, IOR_AIR / IOR_WATER);
-  oldPos = project(position.xzy, refractedLight, ray);
+  oldPos = project(position.xzy, refractedLight, refractedLight);
   newPos = project(position.xzy + vec3(0.0, info.r, 0.0), ray, refractedLight);
 
   gl_Position = vec4(0.8 * (newPos.xz + refractedLight.xz / refractedLight.y), 0.0, 1.0);
