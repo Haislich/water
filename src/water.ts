@@ -11,15 +11,10 @@ export class Water {
 
     constructor() {
         this.geometry = new THREE.PlaneGeometry(2, 2, 200, 200);
-
-        // I use the Shader material insted of the RAW shader Material, it injets some ommonly used variables such as the projectionmatrix, modelViewMatrix and position
-
         this.mesh = new THREE.Mesh(
             this.geometry,
             new THREE.ShaderMaterial({
                 uniforms: {
-                    // float Uniforms, must be manually updated !!!!
-
                     wallLightAbsorption: new THREE.Uniform(params.wallLightAbsorption),
                     aoStrength: new THREE.Uniform(params.aoStrength),
                     aoFalloffPower: new THREE.Uniform(params.aoFalloffPower),
@@ -57,9 +52,6 @@ export class Water {
         this.mesh.material.uniforms['causticProjectionScale'].value = params.causticProjectionScale;
         this.mesh.material.uniforms['causticBoost'].value = params.causticBoost;
         this.mesh.material.uniforms['light'].value = DIRECTIONAL_LIGHT.position;
-
-        // const vpMatrix = new THREE.Matrix4().multiplyMatrices(reflectionCamera.projectionMatrix, reflectionCamera.matrixWorldInverse);
-        // this.mesh.material.uniforms.uReflectionMatrix.value.copy(vpMatrix);
 
         const eyePosition = CAMERA.position;
         const isUnderwater = eyePosition.y < 0;

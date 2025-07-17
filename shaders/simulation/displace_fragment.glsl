@@ -23,7 +23,7 @@ void main() {
   info.r += volumeInSphere(oldCenter);
 
   // Remove the volume at the new position
-  info.r -= volumeInSphere(newCenter);
+  info.r -= volumeInSphere(newCenter);//
 
   gl_FragColor = info;
 }

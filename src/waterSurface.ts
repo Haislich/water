@@ -14,8 +14,8 @@ import normalFrag from '../shaders/simulation/normal_fragment.glsl';
 import displaceFrag from '../shaders/simulation/displace_fragment.glsl';
 
 export class WaterSurface {
-    public mesh: THREE.Mesh;
     private geometry: THREE.PlaneGeometry;
+    public mesh: THREE.Mesh;
     public simulationGeometry: THREE.PlaneGeometry;
 
     private simulation: {
@@ -36,7 +36,7 @@ export class WaterSurface {
     constructor() {
         this.geometry = new THREE.PlaneGeometry(2, 2, 200, 200);
         this.simulationGeometry = new THREE.PlaneGeometry(2, 2);
-        // === VISIBLE WATER MESH ===
+
         this.mesh = new THREE.Mesh(
             this.geometry,
             new THREE.ShaderMaterial({

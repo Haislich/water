@@ -114,6 +114,7 @@ export const setupMountainGui = (gui: GUI, mountains: LabeledObject[]): void => 
 };
 
 const gui = new GUI({ width: 340 });
+
 const scene = new THREE.Scene();
 const debugObjects = {
     dragPlaneHelper: null as THREE.PlaneHelper | null,
@@ -135,79 +136,77 @@ raycaster.layers.enable(0); // default scene
 raycaster.layers.enable(1); // sphere
 const mouse = new THREE.Vector2();
 const targetgeometry = new THREE.PlaneGeometry(2, 2);
-const targetmesh = new THREE.Mesh(targetgeometry, new THREE.MeshStandardMaterial({ wireframe: true }));
+const targetmesh = new THREE.Mesh(targetgeometry, new THREE.MeshStandardMaterial({ wireframe: true, transparent: true }));
+// se non lo aggiungo questa rotatione non ha effetto
 targetmesh.rotateX(-Math.PI / 2);
 scene.add(DIRECTIONAL_LIGHT);
-scene.add(DIRECTIONAL_LIGHT.target);
+scene.add(targetmesh);
+// const gltfLoader = new GLTFLoader();
 
-// scene.add(targetmesh);
+// gltfLoader.load('/models/mountain/scene.gltf', (gltf) => {
+//     const mountain1 = gltf.scene.clone();
+//     mountain1.position.set(-16.1, 1.6, 5.7);
+//     mountain1.rotateY(0.6);
 
-const gltfLoader = new GLTFLoader();
+//     const mountain2 = gltf.scene.clone();
+//     mountain2.position.set(1.7, 2.1, 8.9);
+//     mountain2.rotateY(-1.42);
 
-gltfLoader.load('/models/mountain/scene.gltf', (gltf) => {
-    const mountain1 = gltf.scene.clone();
-    mountain1.position.set(-16.1, 1.6, 5.7);
-    mountain1.rotateY(0.6);
+//     const mountain3 = gltf.scene.clone();
+//     mountain3.position.set(15.4, 1.6, 7.3);
+//     mountain3.rotateY(-3.14);
 
-    const mountain2 = gltf.scene.clone();
-    mountain2.position.set(1.7, 2.1, 8.9);
-    mountain2.rotateY(-1.42);
+//     scene.add(mountain1);
+//     scene.add(mountain2);
+//     scene.add(mountain3);
 
-    const mountain3 = gltf.scene.clone();
-    mountain3.position.set(15.4, 1.6, 7.3);
-    mountain3.rotateY(-3.14);
+//     // setupMountainGui(gui, [
+//     //     { name: 'Mountain 1', object: mountain1 },
+//     //     { name: 'Mountain 2', object: mountain2 },
+//     //     { name: 'Mountain 3', object: mountain3 },
+//     // ]);
+// });
+// gltfLoader.load('/models/pine_tree/scene.gltf', (gltf) => {
+//     const pine1 = gltf.scene.clone();
+//     pine1.position.set(-2, 0, -1);
+//     pine1.scale.setScalar(0.02);
 
-    scene.add(mountain1);
-    scene.add(mountain2);
-    scene.add(mountain3);
+//     const pine2 = gltf.scene.clone();
+//     pine2.position.set(1, 0, 3);
+//     pine2.scale.setScalar(0.02);
 
-    setupMountainGui(gui, [
-        { name: 'Mountain 1', object: mountain1 },
-        { name: 'Mountain 2', object: mountain2 },
-        { name: 'Mountain 3', object: mountain3 },
-    ]);
-});
-gltfLoader.load('/models/pine_tree/scene.gltf', (gltf) => {
-    const pine1 = gltf.scene.clone();
-    pine1.position.set(-2, 0, -1);
-    pine1.scale.setScalar(0.02);
+//     const pine3 = gltf.scene.clone();
+//     pine3.position.set(3, 0, 1);
+//     pine3.scale.setScalar(0.02);
 
-    const pine2 = gltf.scene.clone();
-    pine2.position.set(1, 0, 3);
-    pine2.scale.setScalar(0.02);
+//     const pine4 = gltf.scene.clone();
+//     pine4.position.set(-1.5, 0, 3);
+//     pine4.scale.setScalar(0.02);
 
-    const pine3 = gltf.scene.clone();
-    pine3.position.set(3, 0, 1);
-    pine3.scale.setScalar(0.02);
+//     const pine5 = gltf.scene.clone();
+//     pine5.position.set(-2, 0, 1.7);
+//     pine5.scale.setScalar(0.02);
 
-    const pine4 = gltf.scene.clone();
-    pine4.position.set(-1.5, 0, 3);
-    pine4.scale.setScalar(0.02);
+//     const pine6 = gltf.scene.clone();
+//     pine6.position.set(3, 0, 3);
+//     pine6.scale.setScalar(0.02);
 
-    const pine5 = gltf.scene.clone();
-    pine5.position.set(-2, 0, 1.7);
-    pine5.scale.setScalar(0.02);
+//     scene.add(pine1);
+//     scene.add(pine2);
+//     scene.add(pine3);
+//     scene.add(pine4);
+//     scene.add(pine5);
+//     scene.add(pine6);
 
-    const pine6 = gltf.scene.clone();
-    pine6.position.set(3, 0, 3);
-    pine6.scale.setScalar(0.02);
-
-    scene.add(pine1);
-    scene.add(pine2);
-    scene.add(pine3);
-    scene.add(pine4);
-    scene.add(pine5);
-    scene.add(pine6);
-
-    setupMountainGui(gui, [
-        { name: 'Pine 1', object: pine1 },
-        { name: 'Pine 2', object: pine2 },
-        { name: 'Pine 3', object: pine3 },
-        { name: 'Pine 4', object: pine4 },
-        { name: 'Pine 5', object: pine5 },
-        { name: 'Pine 6', object: pine6 },
-    ]);
-});
+//     // setupMountainGui(gui, [
+//     //     { name: 'Pine 1', object: pine1 },
+//     //     { name: 'Pine 2', object: pine2 },
+//     //     { name: 'Pine 3', object: pine3 },
+//     //     { name: 'Pine 4', object: pine4 },
+//     //     { name: 'Pine 5', object: pine5 },
+//     //     { name: 'Pine 6', object: pine6 },
+//     // ]);
+// });
 
 const sky = new Sky();
 sky.scale.setScalar(450000);
@@ -218,7 +217,7 @@ const waterSimulation = new WaterSimulation();
 const water = new Water();
 const caustics = new Caustics(water.geometry);
 const pool = new Pool();
-// const floor = new Floor();
+const floor = new Floor();
 scene.add(pool.mesh);
 scene.add(water.mesh);
 // scene.add(floor.mesh);
@@ -231,7 +230,7 @@ const smoke2 = new Smoke();
 smoke2.mesh.position.x += 1;
 smoke2.mesh.position.z -= 0.5;
 
-const sphere = new Sphere();
+const sphere = new Sphere(waterSimulation, caustics);
 scene.add(sphere.mesh);
 
 // Main rendering loop
@@ -247,7 +246,7 @@ const animate = (): void => {
     caustics.updateUniforms(waterSimulation.texture);
     water.updateUniforms(waterSimulation.texture, caustics.texture);
     pool.updateUniforms(waterSimulation.texture, caustics.texture);
-    sphere.updateUniforms(waterSimulation.texture, caustics.texture);
+    sphere.updateUniforms();
     sphere.updatePhysics(deltaTime, waterSimulation);
     smoke1.updateUniforms(elapsedTime);
     smoke2.updateUniforms(elapsedTime);
@@ -278,7 +277,7 @@ CANVAS.addEventListener('mousedown', (event) => {
         dragPlane.setFromNormalAndCoplanarPoint(CAMERA.getWorldDirection(new THREE.Vector3()).negate(), intersection);
 
         // Use actual mesh position, not SPHERE_CENTER
-        dragOffset.copy(intersection).sub(sphere.mesh.position);
+        dragOffset.copy(intersection).sub(SPHERE_CENTER);
     } else {
         controls.enabled = true; // let orbit controls do their thing
         isDragging = false;
@@ -314,14 +313,15 @@ CANVAS.addEventListener('mousemove', (event: MouseEvent): void => {
     } else {
         // Regular water drop logic when not dragging
         const intersects = raycaster.intersectObject(targetmesh);
+        // const intersects = raycaster.intersectObject(water.mesh);
         for (const intersect of intersects) {
             waterSimulation.addDrop(intersect.point.x, intersect.point.z, 0.01, 0.04);
         }
     }
 });
 
-for (let i = 0; i < 20; i++) {
-    waterSimulation.addDrop(Math.random() * 2 - 1, Math.random() * 2 - 1, 0.03, i & 1 ? 0.02 : -0.02);
-}
+// for (let i = 0; i < 20; i++) {
+//     waterSimulation.addDrop(Math.random() * 2 - 1, Math.random() * 2 - 1, 0.03, i & 1 ? 0.02 : -0.02);
+// }
 
 animate();

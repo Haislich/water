@@ -3,6 +3,7 @@ const float IOR_WATER = 1.333;
 const float poolHeight = 1.;
 
 uniform vec3 light;
+
 uniform sampler2D tiles;
 uniform sampler2D causticTex;
 uniform sampler2D water;

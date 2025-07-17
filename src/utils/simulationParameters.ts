@@ -25,7 +25,6 @@ export const params = {
 
     dropRadius: 0.03,
     dropStrength: 0.04,
-    sphereRadius: 0.3,
 
     // Light
     azimuth: 50,
@@ -33,12 +32,13 @@ export const params = {
 
     // Misc
     wallLightAbsorption: 0.5,
+    sphereRadius: 0.3,
 };
 export const DIRECTIONAL_LIGHT = new THREE.DirectionalLight(0xf2f3ae, 0.8);
 export const updateLightDirection = (): void => {
     const theta = THREE.MathUtils.degToRad(params.azimuth);
     const phi = THREE.MathUtils.degToRad(-params.altitude);
-    const radius = 3;
+    const radius = 1;
 
     // Point on the circle in XZ plane
     const x = Math.cos(phi) * Math.cos(theta);
@@ -52,7 +52,11 @@ export const updateLightDirection = (): void => {
 updateLightDirection();
 
 export const setupSimulationGUI = (gui: GUI): void => {
-    const folder = gui.addFolder('Simulation Params');
+    // const folder = gui.addFolder('Simulation Params');
+
+    const miscFolder = gui.addFolder('Misc parameters');
+    miscFolder.add(params, 'sphereRadius', 0.01, 0.5).step(0.001);
+    miscFolder.add(params, 'wallLightAbsorption', 0.01, 1.0).step(0.001);
 
     const waterSurfaceFolder = gui.addFolder('Water Surface');
     waterSurfaceFolder.add(params, 'aoStrength', 0.2, 1.2).step(0.1);
@@ -73,15 +77,13 @@ export const setupSimulationGUI = (gui: GUI): void => {
     causticsFolder.add(params, 'rimShadowSlopeScale', 1, 20).step(1);
     causticsFolder.add(params, 'rimShadowVerticalOffset', 0, 1).step(0.01);
 
-    folder.add(params, 'dropRadius', 0.01, 0.1).step(0.001);
-    folder.add(params, 'dropStrength', -0.1, 0.1).step(0.001);
-    folder.add(params, 'sphereRadius', 0.01, 0.5).step(0.001);
-    folder.add(params, 'wallLightAbsorption', 0.01, 1.0).step(0.001);
+    // folder.add(params, 'dropRadius', 0.01, 0.1).step(0.001);
+    // folder.add(params, 'dropStrength', -0.1, 0.1).step(0.001);
 
     const lightFolder = gui.addFolder('Light Direction');
-    lightFolder.add(params, 'azimuth', 1, 360, 1).onChange(updateLightDirection);
+    lightFolder.add(params, 'azimuth', 1, 180, 1).onChange(updateLightDirection);
     lightFolder.add(params, 'altitude', 10, 80, 1).onChange(updateLightDirection);
     lightFolder.open();
 
-    folder.open();
+    // folder.open();
 };

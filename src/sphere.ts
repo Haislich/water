@@ -4,7 +4,7 @@ import sphereFrag from '../shaders/sphere/fragment.glsl';
 import { SPHERE_CENTER } from './utils/globals';
 import { params, DIRECTIONAL_LIGHT } from './utils/simulationParameters';
 import type { WaterSimulation } from './waterSimulation';
-import { color } from 'three/examples/jsm/nodes/Nodes.js';
+import type { Caustics } from './caustics';
 
 const BALL_LAYER = 1;
 
@@ -12,19 +12,19 @@ export class Sphere {
     public geometry: THREE.SphereGeometry;
     public mesh: THREE.Mesh<THREE.SphereGeometry, THREE.ShaderMaterial>;
     public oldCenter = SPHERE_CENTER.clone();
+    public currentCenter = new THREE.Vector3();
     public velocity = new THREE.Vector3();
     public mass: number;
     public gravity = new THREE.Vector3(0, -9.8, 0);
     public usePhysics = true;
 
-    constructor(mass: number = 1) {
+    constructor(waterSimulation: WaterSimulation, caustics: Caustics, mass: number = 1) {
         this.mass = mass;
         this.geometry = new THREE.SphereGeometry();
 
         const shaderMaterial = new THREE.ShaderMaterial({
             vertexShader: sphereVert,
             fragmentShader: sphereFrag,
-            // vertexColors
             uniforms: {
                 wallLightAbsorption: new THREE.Uniform(params.wallLightAbsorption),
                 aoStrength: new THREE.Uniform(params.aoStrength),
@@ -36,8 +36,9 @@ export class Sphere {
                 light: new THREE.Uniform(DIRECTIONAL_LIGHT.position),
                 sphereCenter: new THREE.Uniform(SPHERE_CENTER.clone()),
                 sphereRadius: new THREE.Uniform(params.sphereRadius),
-                caustics: new THREE.Uniform(null),
-                water: new THREE.Uniform(null),
+                water: new THREE.Uniform(waterSimulation.texture),
+                causticTex: new THREE.Uniform(caustics.texture),
+
                 underwaterColor: new THREE.Uniform(params.underWater),
             },
         });
@@ -51,10 +52,8 @@ export class Sphere {
         return SPHERE_CENTER;
     }
 
-    updateUniforms(waterSimulationTexture: THREE.Texture, causticsTexture: THREE.Texture): void {
+    updateUniforms(): void {
         const uniforms = this.mesh.material.uniforms;
-        uniforms['caustics'].value = causticsTexture;
-        uniforms['water'].value = waterSimulationTexture;
         uniforms['sphereRadius'].value = params.sphereRadius;
         uniforms['wallLightAbsorption'].value = params.wallLightAbsorption;
         uniforms['aoStrength'].value = params.aoStrength;
@@ -70,7 +69,7 @@ export class Sphere {
 
         const x = Math.max(-limit, Math.min(limit, this.mesh.position.x + dx));
         const yMin = params.sphereRadius - 1;
-        const yMax = 1; // you can expose this if needed
+        const yMax = 1;
         const y = Math.max(yMin, Math.min(yMax, this.mesh.position.y + dy));
         const z = Math.max(-limit, Math.min(limit, this.mesh.position.z + dz));
 
