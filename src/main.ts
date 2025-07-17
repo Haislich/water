@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
-import { cubeCamera, Water } from './water';
+import { Water } from './water';
 import { Caustics } from './caustics';
 import { WaterSimulation } from './waterSimulation';
 import { Pool } from './pool';
@@ -136,8 +136,7 @@ raycaster.layers.enable(0); // default scene
 raycaster.layers.enable(1); // sphere
 const mouse = new THREE.Vector2();
 const targetgeometry = new THREE.PlaneGeometry(2, 2);
-const targetmesh = new THREE.Mesh(targetgeometry, new THREE.MeshStandardMaterial({ wireframe: true, transparent: true }));
-// se non lo aggiungo questa rotatione non ha effetto
+const targetmesh = new THREE.Mesh(targetgeometry, new THREE.MeshStandardMaterial({ wireframe: true, transparent: true, visible: false }));
 targetmesh.rotateX(-Math.PI / 2);
 scene.add(DIRECTIONAL_LIGHT);
 scene.add(targetmesh);
@@ -191,21 +190,12 @@ gltfLoader.load('/models/pine_tree/scene.gltf', (gltf) => {
     pine6.position.set(3, 0, 3);
     pine6.scale.setScalar(0.02);
 
-    scene.add(pine1);
+    // scene.add(pine1);
     scene.add(pine2);
     scene.add(pine3);
     scene.add(pine4);
     scene.add(pine5);
     scene.add(pine6);
-
-    // setupMountainGui(gui, [
-    //     { name: 'Pine 1', object: pine1 },
-    //     { name: 'Pine 2', object: pine2 },
-    //     { name: 'Pine 3', object: pine3 },
-    //     { name: 'Pine 4', object: pine4 },
-    //     { name: 'Pine 5', object: pine5 },
-    //     { name: 'Pine 6', object: pine6 },
-    // ]);
 });
 
 const sky = new Sky();
@@ -214,28 +204,28 @@ sky.material.uniforms.sunPosition.value = DIRECTIONAL_LIGHT.position;
 scene.add(sky);
 
 const waterSimulation = new WaterSimulation();
-const water = new Water();
-const caustics = new Caustics(water.geometry);
+const caustics = new Caustics();
+const water = new Water(waterSimulation, caustics);
 const pool = new Pool();
 const floor = new Floor();
 scene.add(pool.mesh);
 scene.add(water.mesh);
-// scene.add(floor.mesh);
+scene.add(floor.mesh);
 
 const smoke1 = new Smoke();
 smoke1.mesh.position.z += 0.5;
-// scene.add(smoke1.mesh);
+scene.add(smoke1.mesh);
 const smoke2 = new Smoke();
-// scene.add(smoke2.mesh);
+scene.add(smoke2.mesh);
 smoke2.mesh.position.x += 1;
 smoke2.mesh.position.z -= 0.5;
 
 const sphere = new Sphere(waterSimulation, caustics);
 scene.add(sphere.mesh);
 
-scene.add(cubeCamera);
-cubeCamera.position.copy(CAMERA.position);
-cubeCamera.position.y = 0; // water height
+scene.add(water.cubeCamera);
+// cubeCamera.position.copy(CAMERA.position);
+// cubeCamera.position.y = 0; // water height
 
 // Main rendering loop
 const clock = new THREE.Clock();
@@ -248,16 +238,14 @@ const animate = (): void => {
     waterSimulation.stepSimulation();
     waterSimulation.updateNormals();
     caustics.updateUniforms(waterSimulation.texture);
-    water.updateUniforms(waterSimulation.texture, caustics.texture);
-    pool.updateUniforms(waterSimulation.texture, caustics.texture);
     sphere.updateUniforms();
-    // sphere.updatePhysics(deltaTime, waterSimulation);
+    water.updateUniforms(waterSimulation, caustics, sphere);
+    water.updateReflection(scene);
+
+    pool.updateUniforms(waterSimulation.texture, caustics.texture);
+    sphere.updatePhysics(deltaTime, waterSimulation);
     smoke1.updateUniforms(elapsedTime);
     smoke2.updateUniforms(elapsedTime);
-
-    water.mesh.visible = false; // hide water to avoid reflecting itself
-    cubeCamera.update(RENDERER, scene);
-    water.mesh.visible = true;
 
     RENDERER.render(scene, CAMERA);
     requestAnimationFrame(animate);
@@ -328,8 +316,8 @@ CANVAS.addEventListener('mousemove', (event: MouseEvent): void => {
     }
 });
 
-// for (let i = 0; i < 20; i++) {
-//     waterSimulation.addDrop(Math.random() * 2 - 1, Math.random() * 2 - 1, 0.03, i & 1 ? 0.02 : -0.02);
-// }
+for (let i = 0; i < 20; i++) {
+    waterSimulation.addDrop(Math.random() * 2 - 1, Math.random() * 2 - 1, 0.03, i & 1 ? 0.02 : -0.02);
+}
 
 animate();

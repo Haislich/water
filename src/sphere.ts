@@ -110,7 +110,7 @@ export class Sphere {
         const surfaceY = 0.0;
         if ((bottomBefore > surfaceY && bottomAfter <= surfaceY) || (bottomBefore <= surfaceY && bottomAfter > surfaceY)) {
             // falling into the water
-            water.addDrop(SPHERE_CENTER.x, SPHERE_CENTER.z, radius * 2, 0.01); // larger ripple
+            water.addDrop(SPHERE_CENTER.x, SPHERE_CENTER.z, radius * 2, 0.04); // larger ripple
         }
 
         water.displaceVolume(prev, SPHERE_CENTER, radius);

@@ -9,8 +9,8 @@ export class Caustics {
     private geometry: THREE.PlaneGeometry;
     private causticMesh: THREE.Mesh<THREE.PlaneGeometry, THREE.RawShaderMaterial>;
     private _renderTarget;
-    constructor(lightFrontGeometry: THREE.PlaneGeometry) {
-        this.geometry = lightFrontGeometry;
+    constructor() {
+        this.geometry = new THREE.PlaneGeometry(2, 2, 200, 200);
 
         this._renderTarget = new THREE.WebGLRenderTarget(200, 200, {
             type: THREE.FloatType,

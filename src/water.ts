@@ -2,23 +2,24 @@ import * as THREE from 'three';
 import waterVert from '../shaders/water/vertex.glsl';
 import waterFrag from '../shaders/water/fragment.glsl';
 import { DIRECTIONAL_LIGHT, params } from '../src/utils/simulationParameters';
-import { CUBE_TEXTURE, CAMERA, FLOOR_COLOR } from './utils/constants';
-import { SPHERE_CENTER } from './utils/globals';
-
-export const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(512, {
-    format: THREE.RGBAFormat,
-    generateMipmaps: true,
-    minFilter: THREE.LinearMipmapLinearFilter,
-    colorSpace: THREE.SRGBColorSpace,
-});
-
-export const cubeCamera = new THREE.CubeCamera(0.1, 1000, cubeRenderTarget);
+import { CAMERA, FLOOR_COLOR, RENDERER } from './utils/constants';
+import type { WaterSimulation } from './waterSimulation';
+import type { Caustics } from './caustics';
+import type { Sphere } from './sphere';
 
 export class Water {
     public geometry;
     public mesh;
+    public cubeRenderTarget = new THREE.WebGLCubeRenderTarget(512, {
+        format: THREE.RGBAFormat,
+        generateMipmaps: true,
+        minFilter: THREE.LinearMipmapLinearFilter,
+        colorSpace: THREE.SRGBColorSpace,
+    });
 
-    constructor() {
+    public cubeCamera = new THREE.CubeCamera(0.1, 1000, this.cubeRenderTarget);
+
+    constructor(waterSimulation: WaterSimulation, caustics: Caustics) {
         this.geometry = new THREE.PlaneGeometry(2, 2, 200, 200);
         this.mesh = new THREE.Mesh(
             this.geometry,
@@ -31,19 +32,14 @@ export class Water {
                     causticProjectionScale: new THREE.Uniform(params.causticProjectionScale),
                     causticBoost: new THREE.Uniform(params.causticBoost),
 
-                    // uReflectionTex: { value: CUBE_TEXTURE },
-                    uReflectionTex: { value: cubeRenderTarget.texture },
-
-                    uReflectionMatrix: { value: new THREE.Matrix4() },
-
                     light: { value: DIRECTIONAL_LIGHT.position },
-                    water: { value: null },
+                    water: { value: waterSimulation.texture },
                     tiles: { value: FLOOR_COLOR },
-                    sky: { value: cubeRenderTarget.texture },
-                    causticTex: { value: null },
+                    sky: { value: this.cubeRenderTarget.texture },
+                    causticTex: { value: caustics.texture },
                     underwater: { value: false },
                     eye: { value: null },
-                    sphereCenter: new THREE.Uniform(SPHERE_CENTER),
+                    sphereCenter: new THREE.Uniform(null),
                     sphereRadius: new THREE.Uniform(params.sphereRadius),
                     abovewaterColor: new THREE.Uniform(params.aboveWater),
                     underwaterColor: new THREE.Uniform(params.underWater),
@@ -54,7 +50,7 @@ export class Water {
             })
         );
     }
-    updateUniforms(waterTexture: THREE.Texture, causticsTexture: THREE.Texture): void {
+    updateUniforms(waterSimulation: WaterSimulation, caustics: Caustics, sphere: Sphere): void {
         // Setting up float uniforms
         this.mesh.material.uniforms['wallLightAbsorption'].value = params.wallLightAbsorption;
         this.mesh.material.uniforms['aoStrength'].value = params.aoStrength;
@@ -63,16 +59,21 @@ export class Water {
         this.mesh.material.uniforms['causticProjectionScale'].value = params.causticProjectionScale;
         this.mesh.material.uniforms['causticBoost'].value = params.causticBoost;
         this.mesh.material.uniforms['light'].value = DIRECTIONAL_LIGHT.position;
-        this.mesh.material.uniforms.uReflectionTex.value = cubeRenderTarget.texture;
 
         const eyePosition = CAMERA.position;
         const isUnderwater = eyePosition.y < 0;
-        this.mesh.material.uniforms['water'].value = waterTexture;
-        this.mesh.material.uniforms['causticTex'].value = causticsTexture;
+        this.mesh.material.uniforms['water'].value = waterSimulation.texture;
+        this.mesh.material.uniforms['causticTex'].value = caustics.texture;
         this.mesh.material.uniforms['sphereRadius'].value = params.sphereRadius;
         this.mesh.material.uniforms['underwater'].value = isUnderwater;
-        this.mesh.material.uniforms['sphereCenter'].value = SPHERE_CENTER;
+        this.mesh.material.uniforms['sphereCenter'].value = sphere.center;
         this.mesh.material.side = isUnderwater ? THREE.FrontSide : THREE.BackSide;
         this.mesh.material.uniforms.eye.value = CAMERA.position.clone();
+    }
+
+    updateReflection(scene: THREE.Scene): void {
+        this.mesh.visible = false; // hide water to avoid reflecting itself
+        this.cubeCamera.update(RENDERER, scene);
+        this.mesh.visible = true;
     }
 }

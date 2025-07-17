@@ -19,10 +19,10 @@ void main() {
     texture2D(texture, coord + dy).r) * 0.25;
 
   /* change the velocity to move toward the average */
-  info.g += (average - info.r) * 2.0;
+  info.g += (average - info.r) * 1.0;
 
   /* attenuate the velocity a little so waves do not last forever */
-  info.g *= 0.995;
+  info.g *= 0.97;
 
   /* move the vertex along the velocity */
   info.r += info.g;

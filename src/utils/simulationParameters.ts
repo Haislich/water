@@ -15,7 +15,7 @@ export const params = {
     underWater: new THREE.Color(0.4, 0.9, 1.0),
 
     // Caustics
-    causticIntensityScale: 0.2,
+    causticIntensityScale: 1.2,
     shadowBaseSoftness: 0.05,
     shadowDistanceScale: 0.025,
     shadowDistanceMixScale: 2.0,

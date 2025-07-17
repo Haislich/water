@@ -14,7 +14,7 @@ void main() {
 
   /* Add the drop to the height */
   float drop = max(0.0, 1.0 - length(center * 0.5 + 0.5 - coord) / radius);
-  // drop = 0.5 - cos(drop * PI) * 0.5;
+  drop = 0.5 - cos(drop * PI) * 0.5;
   info.r += drop * strength;
 
   gl_FragColor = info;
