@@ -49,6 +49,7 @@ export class Water {
                 fragmentShader: waterFrag,
             })
         );
+        this.mesh.receiveShadow = true;
     }
     updateUniforms(waterSimulation: WaterSimulation, caustics: Caustics, sphere: Sphere): void {
         // Setting up float uniforms

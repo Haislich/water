@@ -6,8 +6,6 @@ import { params, DIRECTIONAL_LIGHT } from './utils/simulationParameters';
 import type { WaterSimulation } from './waterSimulation';
 import type { Caustics } from './caustics';
 
-const BALL_LAYER = 1;
-
 export class Sphere {
     public geometry: THREE.SphereGeometry;
     public mesh: THREE.Mesh<THREE.SphereGeometry, THREE.ShaderMaterial>;
@@ -44,7 +42,6 @@ export class Sphere {
         });
 
         this.mesh = new THREE.Mesh(this.geometry, shaderMaterial);
-        this.mesh.layers.set(BALL_LAYER);
         this.updatePosition(SPHERE_CENTER);
     }
 

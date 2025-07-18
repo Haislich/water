@@ -34,11 +34,20 @@ export const params = {
     wallLightAbsorption: 0.5,
     sphereRadius: 0.3,
 };
-export const DIRECTIONAL_LIGHT = new THREE.DirectionalLight(0xf2f3ae, 0.8);
+export const DIRECTIONAL_LIGHT = new THREE.DirectionalLight(0xf2f3ae, 1);
+DIRECTIONAL_LIGHT.castShadow = true;
+DIRECTIONAL_LIGHT.shadow.mapSize.set(2048, 2048);
+DIRECTIONAL_LIGHT.shadow.bias = -0.0005;
+DIRECTIONAL_LIGHT.shadow.camera.near = 1;
+DIRECTIONAL_LIGHT.shadow.camera.far = 50;
+DIRECTIONAL_LIGHT.shadow.camera.left = -10;
+DIRECTIONAL_LIGHT.shadow.camera.right = 10;
+DIRECTIONAL_LIGHT.shadow.camera.top = 10;
+DIRECTIONAL_LIGHT.shadow.camera.bottom = -10;
 export const updateLightDirection = (): void => {
     const theta = THREE.MathUtils.degToRad(params.azimuth);
     const phi = THREE.MathUtils.degToRad(-params.altitude);
-    const radius = 3;
+    const radius = 2.5;
 
     // Point on the circle in XZ plane
     const x = Math.cos(phi) * Math.cos(theta);

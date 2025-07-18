@@ -19,7 +19,7 @@ export class Pool {
         this.geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
         this.geometry.setIndex(new THREE.BufferAttribute(indices, 1));
 
-        this.material = new THREE.RawShaderMaterial({
+        this.material = new THREE.ShaderMaterial({
             uniforms: {
                 light: { value: DIRECTIONAL_LIGHT.position },
                 tiles: { value: FLOOR_COLOR },
@@ -35,7 +35,7 @@ export class Pool {
         this.material.side = THREE.FrontSide;
 
         this.mesh = new THREE.Mesh(this.geometry, this.material);
-        this.mesh.layers.set(1);
+        // this.mesh.layers.set(1);
     }
     updateUniforms(waterTexture: THREE.Texture, causticsTexture: THREE.Texture): void {
         this.material.uniforms['water'].value = waterTexture;

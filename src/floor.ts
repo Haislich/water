@@ -40,7 +40,7 @@ const generateGaussianSquareHoleAlphaMap = (size: number = 512, squareRatio: num
     return texture;
 };
 
-const POOL_SIZE = 2;
+const POOL_SIZE = 2.001;
 
 export class Floor {
     public mesh;
@@ -64,6 +64,8 @@ export class Floor {
             displacementScale: 0.3,
             displacementBias: -0.2,
             alphaTest: 0.01,
+            depthWrite: true,
+            depthTest: true,
 
             // wireframe: true,
         });
@@ -71,6 +73,7 @@ export class Floor {
         this.mesh.rotation.x = -Math.PI / 2;
 
         // this.mesh.position.x -= 0.05;
-        this.mesh.position.y += 0.16;
+        this.mesh.position.y += 0.1;
+        this.mesh.receiveShadow = true;
     }
 }

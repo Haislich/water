@@ -46,6 +46,7 @@ const context = CANVAS.getContext('webgl') as WebGLRenderingContext;
 export const RENDERER = new THREE.WebGLRenderer({ canvas: CANVAS, alpha: true, antialias: true, context });
 RENDERER.setSize(window.innerWidth, window.innerHeight);
 RENDERER.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+RENDERER.shadowMap.enabled = true;
 RENDERER.outputColorSpace = THREE.SRGBColorSpace;
 
 window.addEventListener('resize', () => {

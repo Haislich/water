@@ -35,6 +35,7 @@ const setupDebugGui = (gui: GUI, scene: THREE.Scene): void => {
         showDragPlane: false,
         showLightHelper: false,
         showCameraHelper: false,
+        showReflectionCameraHelper: false,
     };
 
     // Toggle for drag plane helper
@@ -81,6 +82,27 @@ const setupDebugGui = (gui: GUI, scene: THREE.Scene): void => {
             }
         }
     });
+    debugFolder.add(options, 'showReflectionCameraHelper').onChange((value: boolean) => {
+        if (value) {
+            if (!debugObjects.cubeCameraHelper) {
+                debugObjects.cubeCameraHelper = [];
+
+                // Assuming water.cubeCamera.children contains six PerspectiveCameras
+                for (const camera of water.cubeCamera.children) {
+                    const helper = new THREE.CameraHelper(camera);
+                    scene.add(helper);
+                    debugObjects.cubeCameraHelper.push(helper);
+                }
+            }
+        } else {
+            if (debugObjects.cubeCameraHelper) {
+                for (const helper of debugObjects.cubeCameraHelper) {
+                    scene.remove(helper);
+                }
+                debugObjects.cubeCameraHelper = null;
+            }
+        }
+    });
 };
 type LabeledObject = {
     name: string;
@@ -120,6 +142,7 @@ const debugObjects = {
     dragPlaneHelper: null as THREE.PlaneHelper | null,
     lightHelper: null as THREE.DirectionalLightHelper | null,
     cameraHelper: null as THREE.CameraHelper | null,
+    cubeCameraHelper: null as THREE.CameraHelper[] | null,
 };
 
 setupGui(gui);
@@ -132,8 +155,7 @@ setupDebugGui(gui, scene);
 
 const controls = new OrbitControls(CAMERA, CANVAS);
 const raycaster = new THREE.Raycaster();
-raycaster.layers.enable(0); // default scene
-raycaster.layers.enable(1); // sphere
+
 const mouse = new THREE.Vector2();
 const targetgeometry = new THREE.PlaneGeometry(2, 2);
 const targetmesh = new THREE.Mesh(targetgeometry, new THREE.MeshStandardMaterial({ wireframe: true, transparent: true, visible: false }));
@@ -142,16 +164,19 @@ scene.add(DIRECTIONAL_LIGHT);
 scene.add(targetmesh);
 const gltfLoader = new GLTFLoader();
 
+let mountain1: THREE.Group | null = null;
+let mountain2: THREE.Group | null = null;
+let mountain3: THREE.Group | null = null;
 gltfLoader.load('/models/mountain/scene.gltf', (gltf) => {
-    const mountain1 = gltf.scene.clone();
+    mountain1 = gltf.scene.clone();
     mountain1.position.set(-16.1, 1.6, 5.7);
     mountain1.rotateY(0.6);
 
-    const mountain2 = gltf.scene.clone();
+    mountain2 = gltf.scene.clone();
     mountain2.position.set(1.7, 2.1, 8.9);
     mountain2.rotateY(-1.42);
 
-    const mountain3 = gltf.scene.clone();
+    mountain3 = gltf.scene.clone();
     mountain3.position.set(15.4, 1.6, 7.3);
     mountain3.rotateY(-3.14);
 
@@ -165,37 +190,49 @@ gltfLoader.load('/models/mountain/scene.gltf', (gltf) => {
     //     { name: 'Mountain 3', object: mountain3 },
     // ]);
 });
+let pine2: THREE.Group | null = null;
+let pine3: THREE.Group | null = null;
+let pine5: THREE.Group | null = null;
 gltfLoader.load('/models/pine_tree/scene.gltf', (gltf) => {
-    const pine1 = gltf.scene.clone();
-    pine1.position.set(-2, 0, -1);
-    pine1.scale.setScalar(0.02);
-
-    const pine2 = gltf.scene.clone();
-    pine2.position.set(1, 0, 3);
+    pine2 = gltf.scene.clone();
+    pine2.position.set(1, 0, 4.1);
     pine2.scale.setScalar(0.02);
+    pine2.traverse((child) => {
+        if ((child as THREE.Mesh).isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+        }
+    });
 
-    const pine3 = gltf.scene.clone();
-    pine3.position.set(3, 0, 1);
+    pine3 = gltf.scene.clone();
+    pine3.position.set(4.1, 0, 0.1);
     pine3.scale.setScalar(0.02);
+    pine3.traverse((child) => {
+        if ((child as THREE.Mesh).isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+        }
+    });
 
-    const pine4 = gltf.scene.clone();
-    pine4.position.set(-1.5, 0, 3);
-    pine4.scale.setScalar(0.02);
-
-    const pine5 = gltf.scene.clone();
-    pine5.position.set(-2, 0, 1.7);
+    pine5 = gltf.scene.clone();
+    pine5.position.set(-3.2, 0, 1.7);
     pine5.scale.setScalar(0.02);
+    pine5.traverse((child) => {
+        if ((child as THREE.Mesh).isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+        }
+    });
 
-    const pine6 = gltf.scene.clone();
-    pine6.position.set(3, 0, 3);
-    pine6.scale.setScalar(0.02);
-
-    // scene.add(pine1);
     scene.add(pine2);
     scene.add(pine3);
-    scene.add(pine4);
     scene.add(pine5);
-    scene.add(pine6);
+
+    setupMountainGui(gui, [
+        { name: 'Mountain 1', object: pine2 },
+        { name: 'Mountain 2', object: pine3 },
+        { name: 'Mountain 3', object: pine5 },
+    ]);
 });
 
 const sky = new Sky();
@@ -234,6 +271,11 @@ const animate = (): void => {
     const elapsedTime = clock.getElapsedTime();
 
     controls.update();
+    if (CAMERA.position.y < 0) {
+        floor.mesh.visible = false;
+    } else {
+        floor.mesh.visible = true;
+    }
 
     waterSimulation.stepSimulation();
     waterSimulation.updateNormals();

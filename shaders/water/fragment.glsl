@@ -10,9 +10,6 @@ uniform vec3 eye;
 
 uniform vec3 abovewaterColor;
 uniform vec3 underwaterColor;
-uniform sampler2D uReflectionTex;
-uniform mat4 uReflectionMatrix;
-
 varying vec3 pos;
 
 float intersectSphere(vec3 origin, vec3 ray, vec3 sphereCenter, float sphereRadius) {
@@ -78,14 +75,8 @@ void main() {
     info = texture2D(water, coord);
   }
 
-  // vec2 slope = info.ba;
-  // vec3 normal = vec3(slope.x, sqrt(1.0 - dot(slope, slope)), slope.y);
   vec2 slope = info.ba;
-  float slopeLen2 = dot(slope, slope);
-  slope = slope * inversesqrt(max(1.0, slopeLen2)); // keep it unit-length max
-
-  float ny = sqrt(max(1e-5, 1.0 - slopeLen2)); // avoid NaN from negative sqrt
-  vec3 normal = vec3(slope.x, ny, slope.y);
+  vec3 normal = vec3(slope.x, sqrt(1.0 - dot(slope, slope)), slope.y);
 
   vec3 incomingRay = normalize(pos - eye);
 
