@@ -72,9 +72,12 @@ export class Water {
         this.mesh.material.uniforms.eye.value = CAMERA.position.clone();
     }
 
-    updateReflection(scene: THREE.Scene): void {
+    updateReflection(scene: THREE.Scene, sphere: Sphere): void {
         this.mesh.visible = false; // hide water to avoid reflecting itself
+        sphere.mesh.visible = false;
         this.cubeCamera.update(RENDERER, scene);
+        sphere.mesh.visible = true;
+
         this.mesh.visible = true;
     }
 }

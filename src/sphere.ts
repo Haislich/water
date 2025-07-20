@@ -40,6 +40,7 @@ export class Sphere {
         });
 
         this.mesh = new THREE.Mesh(this.geometry, shaderMaterial);
+        // this.mesh.visible = false;
         this.updatePosition(SPHERE_CENTER);
     }
 

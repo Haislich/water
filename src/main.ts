@@ -153,15 +153,6 @@ setupDebugGui(gui, scene);
 // `#include <utils>` direcctive and utilize the contants and functions from there.
 (THREE.ShaderChunk as Record<string, string>)['utils'] = utils;
 
-const controls = new OrbitControls(CAMERA, CANVAS);
-const raycaster = new THREE.Raycaster();
-
-const mouse = new THREE.Vector2();
-const targetgeometry = new THREE.PlaneGeometry(2, 2);
-const targetmesh = new THREE.Mesh(targetgeometry, new THREE.MeshStandardMaterial({ wireframe: true, transparent: true, visible: false }));
-targetmesh.rotateX(-Math.PI / 2);
-scene.add(DIRECTIONAL_LIGHT);
-scene.add(targetmesh);
 const gltfLoader = new GLTFLoader();
 
 let mountain1: THREE.Group | null = null;
@@ -235,6 +226,15 @@ gltfLoader.load('/models/pine_tree/scene.gltf', (gltf) => {
     ]);
 });
 
+const controls = new OrbitControls(CAMERA, CANVAS);
+const raycaster = new THREE.Raycaster();
+
+const mouse = new THREE.Vector2();
+const targetgeometry = new THREE.PlaneGeometry(2, 2);
+const targetmesh = new THREE.Mesh(targetgeometry, new THREE.MeshStandardMaterial({ wireframe: true, transparent: true, visible: false }));
+targetmesh.rotateX(-Math.PI / 2);
+scene.add(DIRECTIONAL_LIGHT);
+scene.add(targetmesh);
 const sky = new Sky();
 sky.scale.setScalar(450000);
 sky.material.uniforms.sunPosition.value = DIRECTIONAL_LIGHT.position;
@@ -261,10 +261,6 @@ const sphere = new Sphere(waterSimulation, caustics);
 scene.add(sphere.mesh);
 
 scene.add(water.cubeCamera);
-// cubeCamera.position.copy(CAMERA.position);
-// cubeCamera.position.y = 0; // water height
-
-// Main rendering loop
 const clock = new THREE.Clock();
 const animate = (): void => {
     const deltaTime = clock.getDelta();
@@ -282,7 +278,7 @@ const animate = (): void => {
     caustics.updateUniforms(waterSimulation.texture);
     sphere.updateUniforms();
     water.updateUniforms(waterSimulation, caustics, sphere);
-    water.updateReflection(scene);
+    water.updateReflection(scene, sphere);
 
     pool.updateUniforms(waterSimulation.texture, caustics.texture);
     sphere.updatePhysics(deltaTime, waterSimulation);
