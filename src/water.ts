@@ -20,7 +20,7 @@ export class Water {
     public cubeCamera = new THREE.CubeCamera(0.1, 1000, this.cubeRenderTarget);
 
     constructor(waterSimulation: WaterSimulation, caustics: Caustics) {
-        this.geometry = new THREE.PlaneGeometry(2, 2, 200, 200);
+        this.geometry = new THREE.PlaneGeometry(2, 2, 126, 126);
         this.mesh = new THREE.Mesh(
             this.geometry,
             new THREE.ShaderMaterial({
@@ -31,7 +31,6 @@ export class Water {
                     baseLightDiffuse: new THREE.Uniform(params.baseLightDiffuse),
                     causticProjectionScale: new THREE.Uniform(params.causticProjectionScale),
                     causticBoost: new THREE.Uniform(params.causticBoost),
-
                     light: { value: DIRECTIONAL_LIGHT.position },
                     water: { value: waterSimulation.texture },
                     tiles: { value: FLOOR_COLOR },

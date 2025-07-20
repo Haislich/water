@@ -15,7 +15,7 @@ export class Sphere {
     public gravity = new THREE.Vector3(0, -9.8, 0);
     public usePhysics = true;
 
-    constructor(waterSimulation: WaterSimulation, caustics: Caustics, mass: number = 1) {
+    constructor(waterSimulation: WaterSimulation, caustics: Caustics) {
         this.geometry = new THREE.SphereGeometry();
 
         const shaderMaterial = new THREE.ShaderMaterial({
