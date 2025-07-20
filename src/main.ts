@@ -296,7 +296,7 @@ const intersectionPoint = new THREE.Vector3();
 CANVAS.addEventListener('mousedown', (event) => {
     const rect = CANVAS.getBoundingClientRect();
     mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-    mouse.y = (-(event.clientY - rect.top) / rect.height) * 2 + 1;
+    mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
     raycaster.setFromCamera(mouse, CAMERA);
     const intersects = raycaster.intersectObject(sphere.mesh, true);
@@ -327,15 +327,15 @@ CANVAS.addEventListener('mouseup', () => {
 
 CANVAS.addEventListener('mousemove', (event: MouseEvent): void => {
     const rect = CANVAS.getBoundingClientRect();
-    mouse.x = ((event.clientX - rect.left) * 2) / CANVAS.width - 1;
-    mouse.y = (-(event.clientY - rect.top) * 2) / CANVAS.height + 1;
+    mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
     raycaster.setFromCamera(mouse, CAMERA);
 
     if (isDragging) {
         // Ray-plane intersection to find 3D drag point
         raycaster.ray.intersectPlane(dragPlane, intersectionPoint);
-        console.log(intersectionPoint);
+
         if (intersectionPoint) {
             const newCenter = intersectionPoint.clone().sub(dragOffset);
             const delta = newCenter.sub(sphere.mesh.position);
