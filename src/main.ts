@@ -288,7 +288,6 @@ const animate = (): void => {
     sphere.updatePhysics(deltaTime, waterSimulation);
     smoke1.updateUniforms(elapsedTime);
     smoke2.updateUniforms(elapsedTime);
-
     RENDERER.render(scene, CAMERA);
     requestAnimationFrame(animate);
 };
@@ -340,9 +339,10 @@ CANVAS.addEventListener('mousemove', (event: MouseEvent): void => {
     if (isDragging) {
         // Ray-plane intersection to find 3D drag point
         raycaster.ray.intersectPlane(dragPlane, intersectionPoint);
+        console.log(intersectionPoint);
         if (intersectionPoint) {
             const newCenter = intersectionPoint.clone().sub(dragOffset);
-            const delta = newCenter.sub(SPHERE_CENTER);
+            const delta = newCenter.sub(sphere.mesh.position);
 
             const prev = sphere.center.clone(); // capture before move
             sphere.move(delta.x, delta.y, delta.z);
@@ -351,7 +351,6 @@ CANVAS.addEventListener('mousemove', (event: MouseEvent): void => {
     } else {
         // Regular water drop logic when not dragging
         const intersects = raycaster.intersectObject(targetmesh);
-        // const intersects = raycaster.intersectObject(water.mesh);
         for (const intersect of intersects) {
             waterSimulation.addDrop(intersect.point.x, intersect.point.z, 0.01, 0.04);
         }

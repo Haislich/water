@@ -64,7 +64,7 @@ export const setupSimulationGUI = (gui: GUI): void => {
     // const folder = gui.addFolder('Simulation Params');
 
     const miscFolder = gui.addFolder('Misc parameters');
-    miscFolder.add(params, 'sphereRadius', 0.01, 0.5).step(0.001);
+    miscFolder.add(params, 'sphereRadius', 0.1, 1).step(0.001);
     miscFolder.add(params, 'wallLightAbsorption', 0.01, 1.0).step(0.001);
 
     const waterSurfaceFolder = gui.addFolder('Water Surface');

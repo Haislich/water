@@ -12,12 +12,10 @@ export class Sphere {
     public oldCenter = SPHERE_CENTER.clone();
     public currentCenter = new THREE.Vector3();
     public velocity = new THREE.Vector3();
-    public mass: number;
     public gravity = new THREE.Vector3(0, -9.8, 0);
     public usePhysics = true;
 
     constructor(waterSimulation: WaterSimulation, caustics: Caustics, mass: number = 1) {
-        this.mass = mass;
         this.geometry = new THREE.SphereGeometry();
 
         const shaderMaterial = new THREE.ShaderMaterial({
@@ -59,6 +57,7 @@ export class Sphere {
         uniforms['causticProjectionScale'].value = params.causticProjectionScale;
         uniforms['causticBoost'].value = params.causticBoost;
         uniforms['sphereCenter'].value.copy(SPHERE_CENTER);
+        this.mesh.scale.setScalar(params.sphereRadius);
     }
 
     move(dx: number, dy: number, dz: number): THREE.Vector3 {
@@ -83,7 +82,7 @@ export class Sphere {
         const radius = params.sphereRadius;
         const percentUnderwater = Math.max(0, Math.min(1, (radius - y) / (2 * radius)));
 
-        const adjustedGravity = this.gravity.clone().multiplyScalar(deltaTime * (1 - 1.1 * percentUnderwater));
+        const adjustedGravity = this.gravity.clone().multiplyScalar(deltaTime * (1 - 1.3 * percentUnderwater));
         this.velocity.add(adjustedGravity);
 
         const speed = this.velocity.length();
